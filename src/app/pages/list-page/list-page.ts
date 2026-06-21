@@ -62,7 +62,14 @@ export class ListPageComponent implements OnInit, OnChanges, OnDestroy {
   ) {}
 
   ngOnInit() {
-    const storedRole = localStorage.getItem('opac_role');
+    // Check if user is logged in
+    const sessionData = sessionStorage.getItem('opac_session');
+    if (!sessionData) {
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    const storedRole = sessionStorage.getItem('opac_role');
     if (storedRole && ['SYSTEM_ADMIN', 'APPROVER', 'REQUESTER', 'VIEWER'].includes(storedRole)) {
       this.userRole = storedRole as UserRole;
     }
@@ -121,9 +128,19 @@ export class ListPageComponent implements OnInit, OnChanges, OnDestroy {
 
   loadData(api: string) {
     this.loading = true;
-    this.store.getList(api).subscribe({
+    const tenantId = sessionStorage.getItem('opac_tenant_id');
+    const headers = tenantId ? { 'x-tenant-id': tenantId } : {};
+
+    this.store.getList(api, headers).subscribe({
       next: (rows) => {
-        this.data = rows ?? [];
+        // Filter data by tenant if available
+        if (tenantId && rows) {
+          this.data = rows.filter((row: any) =>
+            row.tenantUuid === tenantId || row.uuid === tenantId
+          );
+        } else {
+          this.data = rows ?? [];
+        }
         this.loading = false;
         this.cdr.detectChanges();
       },

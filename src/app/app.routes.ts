@@ -1,7 +1,14 @@
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/tenant', pathMatch: 'full' },
+  { path: '', redirectTo: '/login', pathMatch: 'full' },
+
+  // Login
+  {
+    path: 'login',
+    loadComponent: () =>
+      import('./pages/login/login.component').then(m => m.LoginComponent)
+  },
 
   // Tenant – tab-param routing
   {

@@ -14,8 +14,9 @@ export class PageStoreService {
   constructor(private http: HttpClient) {}
 
   /** Fetch all records for a given API path */
-  getList(apiPath: string): Observable<any[]> {
-    return this.http.get<any[]>(`${this.backendUrl}${apiPath}`);
+  getList(apiPath: string, customHeaders?: any): Observable<any[]> {
+    const headers = customHeaders ? new HttpHeaders(customHeaders) : undefined;
+    return this.http.get<any[]>(`${this.backendUrl}${apiPath}`, { headers });
   }
 
   /** POST — create new record or trigger a workflow action */
