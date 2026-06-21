@@ -1,0 +1,45 @@
+{
+  "title": "Tenant Configuration",
+  "name": "TenantConfiguration",
+  "store": "tenantConfiguration",
+  "api": "/api/tenant-configuration",
+  "tableUniqueFieldName": "configId",
+  "tableList": [
+    {"name": "configId",    "label": "Config ID",    "isHeaderView": true, "columnView": true},
+    {"name": "tenantName",  "label": "Tenant",       "isHeaderView": true, "columnView": true},
+    {"name": "configKey",   "label": "Config Key",   "isHeaderView": true, "columnView": true},
+    {"name": "configValue", "label": "Config Value", "isHeaderView": true, "columnView": true},
+    {"name": "category",    "label": "Category",     "isHeaderView": true, "columnView": true},
+    {"name": "status",      "label": "Status",       "isHeaderView": true, "columnView": true, "pipe": "status"},
+    {"name": "updatedAt",   "label": "Last Updated", "isHeaderView": true, "columnView": true, "pipe": "date"}
+  ],
+  "contextMenuActions": [
+    {"label": "View Details",   "action": "view"},
+    {"label": "Apply License",  "action": "edit"}
+  ],
+  "tableTool": {"add": false, "edit": false, "refresh": true, "export": false},
+  "steps": [
+    {
+      "stepName": "step1",
+      "label": "License",
+      "index": 1,
+      "fields": [
+        {
+          "name": "licenseDetails",
+          "label": "Active License Details",
+          "type": "display",
+          "isDisabled": true,
+          "colSpan": "col-3"
+        },
+        {
+          "name": "licenseKey",
+          "label": "Enter License Key",
+          "type": "textarea",
+          "required": true,
+          "placeholder": "Paste your encrypted license key here...",
+          "colSpan": "col-3"
+        }
+      ]
+    }
+  ]
+}

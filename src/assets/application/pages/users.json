@@ -1,0 +1,218 @@
+{
+  "title": "User Management",
+  "name": "UserManagement",
+  "store": "users",
+  "api": "/api/users",
+  "tableUniqueFieldName": "userId",
+  "tableList": [
+    {
+      "name": "userId",
+      "label": "User ID",
+      "isHeaderView": true,
+      "columnView": true
+    },
+    {
+      "name": "username",
+      "label": "Username",
+      "isHeaderView": true,
+      "columnView": true
+    },
+    {
+      "name": "email",
+      "label": "Email",
+      "isHeaderView": true,
+      "columnView": true
+    },
+    {
+      "name": "firstName",
+      "label": "First Name",
+      "isHeaderView": true,
+      "columnView": true
+    },
+    {
+      "name": "lastName",
+      "label": "Last Name",
+      "isHeaderView": true,
+      "columnView": true
+    },
+    {
+      "name": "role",
+      "label": "Role",
+      "isHeaderView": true,
+      "columnView": true
+    },
+    {
+      "name": "tenantName",
+      "label": "Tenant",
+      "isHeaderView": true,
+      "columnView": true
+    },
+    {
+      "name": "status",
+      "label": "Status",
+      "isHeaderView": true,
+      "columnView": true,
+      "pipe": "status"
+    },
+    {
+      "name": "createdTimestamp",
+      "label": "Created",
+      "isHeaderView": true,
+      "columnView": true,
+      "pipe": "date"
+    }
+  ],
+  "contextMenuActions": [
+    {
+      "label": "View Details",
+      "action": "view"
+    },
+    {
+      "label": "Edit User",
+      "action": "edit",
+      "showWhen": [
+        "ACTIVE"
+      ]
+    },
+    {
+      "label": "Deactivate",
+      "action": "deactivate",
+      "showWhen": [
+        "ACTIVE"
+      ]
+    },
+    {
+      "label": "Activate",
+      "action": "activate",
+      "showWhen": [
+        "INACTIVE"
+      ]
+    }
+  ],
+  "tableTool": {
+    "add": true,
+    "edit": true,
+    "refresh": true,
+    "export": true
+  },
+  "steps": [
+    {
+      "stepName": "step1",
+      "label": "User Details",
+      "index": 1,
+      "fields": [
+        {
+          "sectionName": "Personal Information",
+          "name": "_s1",
+          "label": "",
+          "type": "hidden"
+        },
+        {
+          "name": "firstName",
+          "label": "First Name",
+          "type": "input",
+          "inputType": "text",
+          "required": true,
+          "placeholder": "First name",
+          "colSpan": "col-1"
+        },
+        {
+          "name": "lastName",
+          "label": "Last Name",
+          "type": "input",
+          "inputType": "text",
+          "required": true,
+          "placeholder": "Last name",
+          "colSpan": "col-1"
+        },
+        {
+          "name": "username",
+          "label": "Username",
+          "type": "input",
+          "inputType": "text",
+          "required": true,
+          "placeholder": "e.g. john.doe",
+          "colSpan": "col-1"
+        },
+        {
+          "sectionName": "Contact",
+          "name": "_s2",
+          "label": "",
+          "type": "hidden"
+        },
+        {
+          "name": "email",
+          "label": "Email",
+          "type": "input",
+          "inputType": "email",
+          "required": true,
+          "placeholder": "user@example.com",
+          "colSpan": "col-1"
+        },
+        {
+          "name": "contactNumber",
+          "label": "Contact Number",
+          "type": "input",
+          "inputType": "text",
+          "placeholder": "+1 555 000 0000",
+          "colSpan": "col-1"
+        },
+        {
+          "sectionName": "Access",
+          "name": "_s3",
+          "label": "",
+          "type": "hidden"
+        },
+        {
+          "name": "role",
+          "label": "Role",
+          "type": "select",
+          "options": [
+            {
+              "label": "System Admin",
+              "value": "SYSTEM_ADMIN"
+            },
+            {
+              "label": "Approver",
+              "value": "APPROVER"
+            },
+            {
+              "label": "Requester",
+              "value": "REQUESTER"
+            },
+            {
+              "label": "Viewer",
+              "value": "VIEWER"
+            }
+          ],
+          "required": true,
+          "colSpan": "col-1"
+        },
+        {
+          "name": "tenantName",
+          "label": "Tenant",
+          "type": "input",
+          "inputType": "text",
+          "placeholder": "Tenant name",
+          "colSpan": "col-1"
+        },
+        {
+          "name": "status",
+          "label": "Status",
+          "type": "select",
+          "options": [
+            {
+              "label": "Active",
+              "value": "ACTIVE"
+            },
+            {
+              "label": "Inactive",
+              "value": "INACTIVE"
+            }
+          ],
+          "colSpan": "col-1"
+        }
+      ]
+    }
+  ]
+}

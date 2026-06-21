@@ -1,0 +1,223 @@
+{
+  "modules": {
+    "erp": {
+      "label": "ERP",
+      "desc": "Enterprise resource planning",
+      "icon": "M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z",
+      "groups": {
+        "Finance": [
+          "/erp/accounts-payable",
+          "/erp/accounts-receivable",
+          "/erp/general-ledger",
+          "/erp/budgeting",
+          "/erp/financial-reporting",
+          "/erp/tax-management",
+          "/erp/cost-center"
+        ],
+        "Human Resources": [
+          "/erp/employee-master",
+          "/erp/payroll",
+          "/erp/attendance",
+          "/erp/leave-management",
+          "/erp/performance-review",
+          "/erp/recruitment",
+          "/erp/org-chart"
+        ],
+        "Procurement": [
+          "/erp/purchase-order",
+          "/erp/vendor-master",
+          "/erp/purchase-requisition",
+          "/erp/goods-receipt",
+          "/erp/invoice-matching",
+          "/erp/contract-management"
+        ],
+        "Inventory": [
+          "/erp/stock-management",
+          "/erp/warehouse",
+          "/erp/stock-transfer",
+          "/erp/bin-location",
+          "/erp/cycle-count",
+          "/erp/inventory-valuation"
+        ],
+        "Reports": [
+          "/erp/financial-summary",
+          "/erp/trial-balance",
+          "/erp/balance-sheet",
+          "/erp/profit-loss",
+          "/erp/cash-flow-report",
+          "/erp/audit-trail"
+        ]
+      },
+      "systemSettings": [
+        "/settings/company-profile",
+        "/settings/fiscal-year",
+        "/settings/currency",
+        "/settings/tax-codes",
+        "/settings/approval-workflow",
+        "/settings/email-notifications",
+        "/settings/user-roles",
+        "/settings/access-policy",
+        "/settings/audit-log"
+      ],
+      "businessMaster": [
+        "/masters/chart-of-accounts",
+        "/masters/cost-centers",
+        "/masters/departments",
+        "/masters/locations",
+        "/masters/uom",
+        "/masters/item-category",
+        "/masters/vendor-category",
+        "/masters/payment-terms"
+      ]
+    },
+    "crm": {
+      "label": "CRM",
+      "desc": "Customer relationship management",
+      "icon": "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M23 21v-2a4 4 0 0 1-3-3.87M16 3.13a4 4 0 0 1 0 7.75M9 7a4 4 0 1 0 0 8 4 4 0 0 0 0-8z",
+      "groups": {
+        "Sales": [
+          "/crm/leads",
+          "/crm/opportunities",
+          "/crm/quotes",
+          "/crm/sales-orders",
+          "/crm/pipeline",
+          "/crm/sales-forecast",
+          "/crm/deal-slip"
+        ],
+        "Contacts": [
+          "/crm/contacts",
+          "/crm/accounts",
+          "/crm/customer-master",
+          "/crm/contact-groups",
+          "/crm/interaction-history"
+        ],
+        "Marketing": [
+          "/crm/campaigns",
+          "/crm/email-marketing",
+          "/crm/lead-scoring",
+          "/crm/market-segments",
+          "/crm/campaign-analytics"
+        ],
+        "Customer Service": [
+          "/crm/tickets",
+          "/crm/support-cases",
+          "/crm/sla-management",
+          "/crm/knowledge-base",
+          "/crm/feedback"
+        ],
+        "Reports": [
+          "/crm/sales-performance",
+          "/crm/lead-conversion",
+          "/crm/customer-analytics",
+          "/crm/revenue-forecast",
+          "/crm/campaign-report"
+        ]
+      },
+      "systemSettings": [
+        "/settings/company-profile",
+        "/settings/currency",
+        "/settings/approval-workflow",
+        "/settings/email-notifications",
+        "/settings/user-roles",
+        "/settings/access-policy",
+        "/settings/audit-log"
+      ],
+      "businessMaster": [
+        "/masters/customer-category",
+        "/masters/sales-territory",
+        "/masters/product-catalog",
+        "/masters/price-list",
+        "/masters/payment-terms",
+        "/masters/industry-type",
+        "/masters/lead-source"
+      ]
+    },
+    "ims": {
+      "label": "IMS",
+      "desc": "Inventory management system",
+      "icon": "M12 4L4 8l8 4 8-4-8-4zM4 12l8 4 8-4M4 16l8 4 8-4",
+      "groups": {
+        "Inventory Operations": [
+          "/ims/goods-receipt",
+          "/ims/goods-issue",
+          "/ims/stock-transfer",
+          "/ims/stock-adjustment",
+          "/ims/return-to-vendor",
+          "/ims/customer-return"
+        ],
+        "Warehouse": [
+          "/ims/warehouse-master",
+          "/ims/bin-management",
+          "/ims/pick-list",
+          "/ims/put-away",
+          "/ims/packing",
+          "/ims/dispatch"
+        ],
+        "Tracking": [
+          "/ims/batch-tracking",
+          "/ims/serial-number",
+          "/ims/expiry-management",
+          "/ims/barcode-management",
+          "/ims/rfid-tracking"
+        ],
+        "Planning": [
+          "/ims/demand-planning",
+          "/ims/reorder-point",
+          "/ims/safety-stock",
+          "/ims/replenishment",
+          "/ims/abc-analysis"
+        ],
+        "Reports": [
+          "/ims/stock-summary",
+          "/ims/movement-report",
+          "/ims/aging-report",
+          "/ims/valuation-report",
+          "/ims/slow-moving-report"
+        ]
+      },
+      "systemSettings": [
+        "/settings/company-profile",
+        "/settings/currency",
+        "/settings/uom",
+        "/settings/approval-workflow",
+        "/settings/email-notifications",
+        "/settings/user-roles",
+        "/settings/access-policy",
+        "/settings/audit-log"
+      ],
+      "businessMaster": [
+        "/masters/item-master",
+        "/masters/warehouse-master",
+        "/masters/uom",
+        "/masters/item-category",
+        "/masters/bin-locations",
+        "/masters/supplier-master",
+        "/masters/storage-conditions"
+      ]
+    }
+  },
+  "system": {
+    "System Settings": [
+      "/settings/company-profile",
+      "/settings/fiscal-year",
+      "/settings/currency",
+      "/settings/tax-codes",
+      "/settings/approval-workflow",
+      "/settings/email-notifications",
+      "/settings/user-roles",
+      "/settings/access-policy",
+      "/settings/audit-log",
+      "/settings/session-management"
+    ],
+    "Business Master": [
+      "/masters/chart-of-accounts",
+      "/masters/departments",
+      "/masters/locations",
+      "/masters/uom",
+      "/masters/item-category",
+      "/masters/payment-terms",
+      "/masters/currency-master",
+      "/masters/country-master"
+    ]
+  }
+}

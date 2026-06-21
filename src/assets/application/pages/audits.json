@@ -1,0 +1,35 @@
+{
+  "title": "Audit Logs",
+  "name": "AuditLogs",
+  "store": "audits",
+  "api": "/api/audits",
+  "tableUniqueFieldName": "auditId",
+  "toggleButton": {
+    "elements": [
+      {"label": "All",    "value": "All",    "isDefault": true},
+      {"label": "Insert", "value": "Insert"},
+      {"label": "Update", "value": "Update"},
+      {"label": "Delete", "value": "Delete"}
+    ],
+    "statusMap": {
+      "All":    [],
+      "Insert": ["INSERT"],
+      "Update": ["UPDATE"],
+      "Delete": ["DELETE"]
+    }
+  },
+  "tableList": [
+    {"name": "auditId",           "label": "Audit ID",     "isHeaderView": true, "columnView": true},
+    {"name": "action",            "label": "Action",       "isHeaderView": true, "columnView": true, "pipe": "status"},
+    {"name": "entityType",        "label": "Module",       "isHeaderView": true, "columnView": true},
+    {"name": "entityId",          "label": "Entity ID",    "isHeaderView": true, "columnView": true},
+    {"name": "performedBy",       "label": "Performed By", "isHeaderView": true, "columnView": true},
+    {"name": "tenantName",        "label": "Entity",       "isHeaderView": true, "columnView": true},
+    {"name": "description",       "label": "Description",  "isHeaderView": true, "columnView": true},
+    {"name": "createdTimestamp",  "label": "Timestamp",    "isHeaderView": true, "columnView": true, "pipe": "date"}
+  ],
+  "contextMenuActions": [
+    {"label": "View Details", "action": "view"}
+  ],
+  "tableTool": {"add": false, "edit": false, "refresh": true, "export": true}
+}

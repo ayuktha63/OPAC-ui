@@ -1,0 +1,252 @@
+{
+  "title": "License Requests",
+  "name": "LicenseRequest",
+  "store": "licenseRequest",
+  "api": "/api/licenses",
+  "workflowApiBase": "/api/licenses",
+  "tableUniqueFieldName": "uuid",
+  "tableConfig": {
+    "enableScrollIndicators": false
+  },
+  "toggleButton": {
+    "elements": [
+      {
+        "label": "Request",
+        "value": "Request",
+        "isDefault": true
+      },
+      {
+        "label": "In Progress",
+        "value": "In-Progress"
+      },
+      {
+        "label": "Active",
+        "value": "Active"
+      },
+      {
+        "label": "Inactive",
+        "value": "Inactive"
+      }
+    ],
+    "statusMap": {
+      "Request": [
+        "Draft",
+        "Returned",
+        "Rejected"
+      ],
+      "In-Progress": [
+        "In Progress"
+      ],
+      "Active": [
+        "Active"
+      ],
+      "Inactive": [
+        "Expired",
+        "Cancelled"
+      ]
+    }
+  },
+  "tableList": [
+    {
+      "name": "requestId",
+      "label": "Request ID",
+      "isHeaderView": true,
+      "columnView": true
+    },
+    {
+      "name": "companyName",
+      "label": "Company Name",
+      "isHeaderView": true,
+      "columnView": true
+    },
+    {
+      "name": "email",
+      "label": "Email",
+      "isHeaderView": true,
+      "columnView": true
+    },
+    {
+      "name": "requestedBy",
+      "label": "Requested By",
+      "isHeaderView": true,
+      "columnView": true
+    },
+    {
+      "name": "status",
+      "label": "Status",
+      "isHeaderView": true,
+      "columnView": true,
+      "pipe": "status"
+    },
+    {
+      "name": "createdTimestamp",
+      "label": "Created",
+      "isHeaderView": true,
+      "columnView": true,
+      "pipe": "date"
+    }
+  ],
+  "sidePanelFields": [
+    {
+      "name": "_s1",
+      "label": "Requester Details",
+      "type": "hidden",
+      "sectionName": "Requester Details"
+    },
+    {
+      "name": "requestId",
+      "label": "Request ID"
+    },
+    {
+      "name": "companyName",
+      "label": "Company Name"
+    },
+    {
+      "name": "email",
+      "label": "Email"
+    },
+    {
+      "name": "requestedBy",
+      "label": "Requested By"
+    },
+    {
+      "name": "requestType",
+      "label": "Request Type"
+    },
+    {
+      "name": "status",
+      "label": "Status",
+      "pipe": "status"
+    },
+    {
+      "name": "createdTimestamp",
+      "label": "Created",
+      "pipe": "date"
+    },
+    {
+      "name": "_s2",
+      "label": "License Details",
+      "type": "hidden",
+      "sectionName": "License Details"
+    },
+    {
+      "name": "licenseDetails",
+      "label": "License Details per Product",
+      "type": "licenseDetails",
+      "columns": [
+        { "name": "userLimit",       "label": "Users" },
+        { "name": "concurrentLimit", "label": "Concurrent" },
+        { "name": "gracePeriod",     "label": "Grace (Days)" },
+        { "name": "startDate",       "label": "Start Date",  "pipe": "date" },
+        { "name": "endDate",         "label": "End Date",    "pipe": "date" }
+      ]
+    }
+  ],
+  "contextMenuActions": [],
+  "tableTool": {
+    "add": true,
+    "edit": true,
+    "refresh": true,
+    "clear": true,
+    "export": true
+  },
+  "steps": [
+    {
+      "stepName": "step1",
+      "label": "Requester Details",
+      "index": 1,
+      "fields": [
+        {
+          "sectionName": "Requester Details",
+          "name": "_section1",
+          "label": "",
+          "type": "hidden"
+        },
+        {
+          "name": "tenantUuid",
+          "label": "Tenant",
+          "type": "select",
+          "placeholder": "Select Tenant",
+          "required": true,
+          "colSpan": "col-1",
+          "options": []
+        },
+        {
+          "name": "companyName",
+          "label": "Company Name",
+          "type": "input",
+          "inputType": "text",
+          "required": true,
+          "colSpan": "col-1"
+        },
+        {
+          "name": "email",
+          "label": "Email ID",
+          "type": "input",
+          "inputType": "email",
+          "required": true,
+          "colSpan": "col-1"
+        },
+        {
+          "name": "requestedBy",
+          "label": "Requested By",
+          "type": "select",
+          "placeholder": "Select Requester",
+          "required": true,
+          "colSpan": "col-1",
+          "options": []
+        }
+      ]
+    },
+    {
+      "stepName": "step2",
+      "label": "Select Modules",
+      "index": 2,
+      "fields": [
+        {
+          "name": "modules",
+          "label": "License Modules",
+          "type": "licenseModules",
+          "colSpan": "col-3",
+          "configPath": "assets/application/pages/license-modules.json"
+        }
+      ]
+    },
+    {
+      "stepName": "step3",
+      "label": "License Details",
+      "index": 3,
+      "fields": [],
+      "licenseDetailColumns": [
+        {
+          "name": "userLimit",
+          "label": "Users",
+          "inputType": "number",
+          "placeholder": "e.g. 80"
+        },
+        {
+          "name": "concurrentLimit",
+          "label": "Concurrent",
+          "inputType": "number",
+          "placeholder": "e.g. 15"
+        },
+        {
+          "name": "gracePeriod",
+          "label": "Grace (Days)",
+          "inputType": "number",
+          "placeholder": "e.g. 30"
+        },
+        {
+          "name": "startDate",
+          "label": "Start Date",
+          "inputType": "date"
+        },
+        {
+          "name": "endDate",
+          "label": "End Date",
+          "inputType": "date"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "title": "Tenant Requests",
+  "name": "TenantRequest",
+  "store": "tenantRequest",
+  "api": "/api/tenants",
+  "workflowApiBase": "/api/tenants",
+  "tableUniqueFieldName": "uuid",
+  "tableConfig": {
+    "enableScrollIndicators": true
+  },
+  "toggleButton": {
+    "elements": [
+      { "label": "Requests",    "value": "Requests", "isDefault": true },
+      { "label": "In-Progress", "value": "In-Progress" },
+      { "label": "Active",      "value": "Active" },
+      { "label": "Inactive",    "value": "Inactive" }
+    ],
+    "statusMap": {
+      "Requests":    ["Draft", "Returned"],
+      "In-Progress": ["In Progress"],
+      "Active":      ["Active"],
+      "Inactive":    ["Inactive", "Rejected"]
+    }
+  },
+  "tableList": [
+    { "name": "requestId",                 "label": "Request ID",                     "isHeaderView": true, "columnView": true },
+    { "name": "adminFirstName",             "label": "Business Admin First Name",      "isHeaderView": true, "columnView": true },
+    { "name": "adminLastName",              "label": "Business Admin Last Name",       "isHeaderView": true, "columnView": true },
+    { "name": "contactNumber",              "label": "Business Admin Contact Number",  "isHeaderView": true, "columnView": true },
+    { "name": "adminEmail",                 "label": "Business Admin Email ID",        "isHeaderView": true, "columnView": true },
+    { "name": "adminUsername",              "label": "Business Admin User Name",       "isHeaderView": true, "columnView": true },
+    { "name": "companyName",                "label": "Customer/Company Name",          "isHeaderView": true, "columnView": true },
+    { "name": "tenantName",                 "label": "Tenant Alias/Tenant Name",       "isHeaderView": true, "columnView": true },
+    { "name": "baseCurrency",               "label": "Base Currency",                  "isHeaderView": true, "columnView": true },
+    { "name": "country",                    "label": "Company Registration Country",   "isHeaderView": true, "columnView": true },
+    { "name": "timezone",                   "label": "Time Zone",                      "isHeaderView": true, "columnView": true },
+    { "name": "companyRegistrationNumber",  "label": "Company Registration Number",    "isHeaderView": true, "columnView": true },
+    { "name": "status",                    "label": "Status",                         "isHeaderView": true, "columnView": true, "pipe": "status" }
+  ],
+  "contextMenuActions": [],
+  "tableTool": {
+    "add": true,
+    "edit": true,
+    "refresh": true,
+    "clear": true,
+    "export": true
+  },
+  "steps": [
+    {
+      "stepName": "step1",
+      "label": "Tenant Details",
+      "index": 1,
+      "fields": [
+        { "sectionName": "Business Admin Details", "name": "_section1", "label": "", "type": "hidden" },
+        { "name": "adminFirstName", "label": "Business Admin First Name", "type": "input", "inputType": "text", "required": true, "placeholder": "Enter Business Admin First Name", "colSpan": "col-1" },
+        { "name": "adminLastName", "label": "Business Admin Last Name", "type": "input", "inputType": "text", "required": true, "placeholder": "Enter Business Admin Last Name", "colSpan": "col-1" },
+        { "name": "contactNumber", "label": "Business Admin Contact Number", "type": "input", "inputType": "text", "required": true, "placeholder": "Enter Business Admin Contact Number", "colSpan": "col-1" },
+        { "name": "adminEmail", "label": "Business Admin Email ID", "type": "input", "inputType": "email", "required": true, "placeholder": "Enter Business Admin Email ID", "colSpan": "col-1" },
+        { "name": "adminUsername", "label": "Business Admin User Name", "type": "input", "inputType": "text", "required": true, "placeholder": "Enter Business Admin User Name", "colSpan": "col-1" },
+        
+        { "sectionName": "Company & Tenant Details", "name": "_section2", "label": "", "type": "hidden" },
+        { "name": "companyName", "label": "Customer/Company Name", "type": "input", "inputType": "text", "required": true, "placeholder": "Enter Customer/Company Name", "colSpan": "col-1" },
+        { "name": "tenantName", "label": "Tenant Alias/Tenant Name", "type": "input", "inputType": "text", "required": true, "placeholder": "Enter Tenant Alias/Tenant Name", "colSpan": "col-1" },
+        { "name": "baseCurrency", "label": "Base Currency", "type": "select", "placeholder": "Select", "options": [
+            {"label": "USD - US Dollar", "value": "USD"},
+            {"label": "EUR - Euro", "value": "EUR"},
+            {"label": "GBP - British Pound", "value": "GBP"},
+            {"label": "INR - Indian Rupee", "value": "INR"}
+          ], "colSpan": "col-1" },
+        { "name": "country", "label": "Company Registration Country", "type": "select", "placeholder": "Select", "options": [
+            {"label": "India", "value": "India"},
+            {"label": "United States", "value": "United States"},
+            {"label": "United Kingdom", "value": "United Kingdom"},
+            {"label": "Singapore", "value": "Singapore"}
+          ], "colSpan": "col-1" },
+        { "name": "timezone", "label": "Time Zone", "type": "select", "placeholder": "Select", "options": [
+            {"label": "UTC+05:30 (IST)", "value": "UTC+05:30"},
+            {"label": "UTC-05:00 (EST)", "value": "UTC-05:00"},
+            {"label": "UTC+00:00 (GMT)", "value": "UTC+00:00"}
+          ], "colSpan": "col-1" },
+        { "name": "companyRegistrationNumber", "label": "Company Registration Number", "type": "input", "inputType": "text", "required": true, "placeholder": "Enter Company Registration Number", "colSpan": "col-1" }
+      ]
+    }
+  ]
+}

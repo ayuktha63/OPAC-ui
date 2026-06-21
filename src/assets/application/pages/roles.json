@@ -1,0 +1,183 @@
+{
+  "title": "Role Management",
+  "name": "RoleManagement",
+  "store": "roles",
+  "api": "/api/roles",
+  "tableUniqueFieldName": "roleId",
+  "tableList": [
+    {
+      "name": "roleId",
+      "label": "Role ID",
+      "isHeaderView": true,
+      "columnView": true
+    },
+    {
+      "name": "roleName",
+      "label": "Role Name",
+      "isHeaderView": true,
+      "columnView": true
+    },
+    {
+      "name": "roleCode",
+      "label": "Role Code",
+      "isHeaderView": true,
+      "columnView": true
+    },
+    {
+      "name": "roleType",
+      "label": "Role Type",
+      "isHeaderView": true,
+      "columnView": true
+    },
+    {
+      "name": "description",
+      "label": "Description",
+      "isHeaderView": true,
+      "columnView": true
+    },
+    {
+      "name": "tenantName",
+      "label": "Tenant",
+      "isHeaderView": true,
+      "columnView": true
+    },
+    {
+      "name": "permissionCount",
+      "label": "Permissions",
+      "isHeaderView": true,
+      "columnView": true
+    },
+    {
+      "name": "status",
+      "label": "Status",
+      "isHeaderView": true,
+      "columnView": true,
+      "pipe": "status"
+    },
+    {
+      "name": "createdTimestamp",
+      "label": "Created",
+      "isHeaderView": true,
+      "columnView": true,
+      "pipe": "date"
+    }
+  ],
+  "contextMenuActions": [
+    {
+      "label": "View Details",
+      "action": "view"
+    },
+    {
+      "label": "Edit Role",
+      "action": "edit"
+    },
+    {
+      "label": "Manage Permissions",
+      "action": "permissions"
+    },
+    {
+      "label": "Delete Role",
+      "action": "delete"
+    }
+  ],
+  "tableTool": {
+    "add": true,
+    "edit": true,
+    "refresh": true,
+    "export": false
+  },
+  "steps": [
+    {
+      "stepName": "step1",
+      "label": "Role Details",
+      "index": 1,
+      "fields": [
+        {
+          "name": "roleName",
+          "label": "Role Name",
+          "type": "input",
+          "inputType": "text",
+          "required": true,
+          "placeholder": "e.g. Finance Approver",
+          "colSpan": "col-1"
+        },
+        {
+          "name": "roleCode",
+          "label": "Role Code",
+          "type": "input",
+          "inputType": "text",
+          "required": true,
+          "placeholder": "e.g. FINANCE_APPROVER",
+          "colSpan": "col-1"
+        },
+        {
+          "name": "description",
+          "label": "Description",
+          "type": "textarea",
+          "placeholder": "Describe this role's responsibilities",
+          "colSpan": "col-3"
+        },
+        {
+          "sectionName": "Role Type",
+          "name": "_s1",
+          "label": "",
+          "type": "hidden"
+        },
+        {
+          "name": "roleType",
+          "label": "Role Type",
+          "type": "select",
+          "options": [
+            {
+              "label": "System Admin",
+              "value": "SYSTEM_ADMIN"
+            },
+            {
+              "label": "Approver",
+              "value": "APPROVER"
+            },
+            {
+              "label": "Requester",
+              "value": "REQUESTER"
+            },
+            {
+              "label": "Viewer",
+              "value": "VIEWER"
+            }
+          ],
+          "required": true,
+          "colSpan": "col-1"
+        },
+        {
+          "name": "status",
+          "label": "Status",
+          "type": "select",
+          "options": [
+            {
+              "label": "Active",
+              "value": "ACTIVE"
+            },
+            {
+              "label": "Inactive",
+              "value": "INACTIVE"
+            }
+          ],
+          "colSpan": "col-1"
+        }
+      ]
+    },
+    {
+      "stepName": "step2",
+      "label": "Role Action Permissions",
+      "index": 2,
+      "fields": [
+        {
+          "name": "actions",
+          "label": "Action Permissions",
+          "type": "roleActions",
+          "colSpan": "col-3"
+        }
+      ]
+    }
+  ]
+}

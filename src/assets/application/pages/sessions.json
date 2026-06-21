@@ -1,0 +1,34 @@
+{
+  "title": "Session Management",
+  "name": "SessionManagement",
+  "store": "sessions",
+  "api": "/api/sessions",
+  "tableUniqueFieldName": "sessionId",
+  "toggleButton": {
+    "elements": [
+      {"label": "Active",   "value": "Active",   "isDefault": true},
+      {"label": "Inactive", "value": "Inactive"},
+      {"label": "All",      "value": "All"}
+    ],
+    "statusMap": {
+      "Active":   ["Active"],
+      "Inactive": ["Inactive"],
+      "All":      []
+    }
+  },
+  "tableList": [
+    {"name": "sessionId",         "label": "Session ID",  "isHeaderView": true, "columnView": true},
+    {"name": "username",          "label": "Username",    "isHeaderView": true, "columnView": true},
+    {"name": "tenantName",        "label": "Tenant",      "isHeaderView": true, "columnView": true},
+    {"name": "ipAddress",         "label": "IP Address",  "isHeaderView": true, "columnView": true},
+    {"name": "browser",           "label": "Browser",     "isHeaderView": true, "columnView": true},
+    {"name": "device",            "label": "Device",      "isHeaderView": true, "columnView": true},
+    {"name": "status",            "label": "Status",      "isHeaderView": true, "columnView": true, "pipe": "status"},
+    {"name": "createdTimestamp",  "label": "Login Time",  "isHeaderView": true, "columnView": true, "pipe": "date"}
+  ],
+  "contextMenuActions": [
+    {"label": "View Details",      "action": "view"},
+    {"label": "Terminate Session", "action": "terminate", "showWhen": ["Active"]}
+  ],
+  "tableTool": {"add": false, "edit": false, "refresh": true, "export": true}
+}
