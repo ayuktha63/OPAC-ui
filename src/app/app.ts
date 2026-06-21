@@ -1,13 +1,13 @@
-import { Component, ElementRef, HostListener, OnInit } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterOutlet } from '@angular/router';
 import { ContextSwitcherComponent, OToastComponent } from 'orque-ui';
 import { SystemSettingsService } from './core/system-settings.service';
-
-type LoginType = 'SYSTEM_ADMIN' | 'BUSINESS_USER';
-type UserRole  = 'SYSTEM_ADMIN' | 'APPROVER' | 'REQUESTER' | 'VIEWER';
+import { TenantContextService } from './core/tenant-context.service';
+import { AuthService } from './core/auth.service';
+import { ToastService } from './core/toast.service';
 
 @Component({
   selector: 'app-root',
@@ -21,14 +21,13 @@ export class App implements OnInit {
 
   // ── Login State ─────────────────────────────────────────
   isLoggedIn  = false;
-  loginType: LoginType = 'SYSTEM_ADMIN';   // replaces isSelect
-  selectedRole: UserRole = 'SYSTEM_ADMIN'; // sub-role for system admin login
+  isLoading   = false;
+  loginMode: 'business' | 'system' = 'business';
   companyName = '';
   username    = '';
   password    = '';
+  userRole    = 'REQUESTER';
 
-  // Derived convenience getter (keeps template in sync)
-  get isSelect(): boolean { return this.loginType === 'SYSTEM_ADMIN'; }
 
   // ── Shell Navigation ─────────────────────────────────────
   currentContext = 'OPAC';
@@ -54,80 +53,107 @@ export class App implements OnInit {
     private readonly http: HttpClient,
     private readonly router: Router,
     private readonly elRef: ElementRef,
-    readonly settingsSvc: SystemSettingsService
+    private readonly cdr: ChangeDetectorRef,
+    readonly settingsSvc: SystemSettingsService,
+    private readonly tenantContextSvc: TenantContextService,
+    private readonly authSvc: AuthService,
+    private readonly toastSvc: ToastService
   ) {}
 
   ngOnInit() {
     this.loadActiveTenants();
   }
 
-  // ── Role label for display ────────────────────────────────
   get roleDisplayLabel(): string {
-    switch (this.selectedRole) {
+    switch (this.userRole) {
       case 'SYSTEM_ADMIN': return 'System Admin';
       case 'APPROVER':     return 'Approver';
       case 'REQUESTER':    return 'Requester';
       case 'VIEWER':       return 'Viewer';
-      default:             return 'Unknown';
+      default:             return 'Requester';
     }
   }
 
-  get loginTypeDisplayLabel(): string {
-    return this.loginType === 'SYSTEM_ADMIN' ? 'System Admin' : 'Business User';
+  get loginModeLabel(): string {
+    return this.loginMode === 'system' ? 'System Admin' : 'Business User';
   }
 
   // ── Authentication ────────────────────────────────────────
   onLoginSubmit() {
-    if (this.loginType === 'SYSTEM_ADMIN') {
-      if (!this.username || !this.password) {
-        console.error('Please enter System Admin Email and Password.');
-        return;
-      }
-      localStorage.setItem('opac_role', this.selectedRole);
-      this.isLoggedIn = true;
-      this.navigateByRole();
-      this.logSession();
-    } else {
-      if (!this.companyName) { console.error('Please enter Company Name.'); return; }
-      if (!this.username || !this.password) { console.error('Please enter Username and Password.'); return; }
-      const matched = this.activeTenantsList.find(
-        t => t.tenant_name?.toLowerCase()  === this.companyName.toLowerCase() ||
-             t.company_name?.toLowerCase() === this.companyName.toLowerCase()
-      );
-      if (!matched) { console.error('Company/Tenant not found.'); return; }
-      this.activeTenant = matched;
-      localStorage.setItem('opac_role', 'REQUESTER');
-      this.isLoggedIn = true;
-      this.router.navigate(['/tenant']);
-      this.logSession();
+    if (!this.username || !this.password) {
+      this.toastSvc.error('Please enter Username and Password.');
+      return;
     }
-  }
 
-  /** Navigate to the most relevant first page based on role */
-  private navigateByRole() {
-    switch (this.selectedRole) {
-      case 'APPROVER':
-        this.router.navigate(['/tenant/In-Progress']);
-        break;
-      case 'REQUESTER':
-        this.router.navigate(['/tenant/In-Progress']);
-        break;
-      default:
-        this.router.navigate(['/tenant']);
+    if (!this.companyName) {
+      this.toastSvc.error('Please enter Tenant/Company Name.');
+      return;
     }
+
+    this.isLoading = true;
+    console.log('🔓 Starting login with mode:', this.loginMode);
+
+    this.authSvc.login({
+      username: this.username,
+      password: this.password,
+      tenantName: this.companyName,
+      loginMode: this.loginMode
+    }).subscribe({
+      next: (response) => {
+        console.log('✅ Login response received:', response);
+        this.isLoading = false;
+
+        if (response.success && response.data) {
+          console.log('✨ Login successful! Setting up user context...');
+          this.toastSvc.success('Login successful!');
+          this.userRole = response.data.role;
+          this.activeTenant = {
+            uuid: response.data.tenantUuid,
+            tenant_name: response.data.tenantName,
+            company_name: response.data.tenantName
+          };
+          console.log('📍 Active tenant set to:', this.activeTenant);
+
+          this.tenantContextSvc.setTenantContext(
+            response.data.tenantUuid || '',
+            this.loginMode,
+            this.userRole
+          );
+
+          this.isLoggedIn = true;
+          this.cdr.detectChanges();
+          console.log('✅ isLoggedIn set to true, navigating to /tenant');
+          this.router.navigate(['/tenant']).then(success => {
+            console.log('🚀 Navigation result:', success);
+          });
+          this.logSession();
+        } else {
+          console.error('❌ Response not successful:', response);
+          this.toastSvc.error(response.message || 'Login failed');
+        }
+      },
+      error: (error) => {
+        this.isLoading = false;
+        console.error('❌ Login error:', error);
+        const errorMessage = error.message || 'Invalid username or password';
+        this.toastSvc.error(errorMessage);
+      }
+    });
   }
 
   onLogout() {
-    localStorage.removeItem('opac_role');
+    this.authSvc.logout();
+    this.tenantContextSvc.clearContext();
     this.isLoggedIn   = false;
     this.username     = '';
     this.password     = '';
     this.companyName  = '';
-    this.loginType    = 'SYSTEM_ADMIN';
-    this.selectedRole = 'SYSTEM_ADMIN';
+    this.loginMode    = 'business';
+    this.userRole     = 'REQUESTER';
     this.settingsOpen = false;
     this.profileOpen  = false;
     this.showProfileModal = false;
+    this.toastSvc.success('Logged out successfully');
   }
 
   // ── Router Navigation ─────────────────────────────────────
@@ -219,10 +245,10 @@ export class App implements OnInit {
       : userAgent.includes('Firefox') ? 'Firefox' : 'Safari';
     this.http.post(`${this.backendUrl}/api/sessions/create`, {
       tenantUuid: this.activeTenant?.uuid || null,
-      username:   this.loginType === 'SYSTEM_ADMIN' ? 'admin@orque.com' : this.username,
-      device:     'MacBook Pro',
+      username: this.username,
+      device: 'MacBook Pro',
       browser,
-      ipAddress:  '127.0.0.1'
+      ipAddress: '127.0.0.1'
     }).subscribe({ error: (e) => console.error('Session log failed:', e) });
   }
 }

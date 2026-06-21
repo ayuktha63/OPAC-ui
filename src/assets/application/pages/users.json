@@ -191,9 +191,10 @@
         {
           "name": "tenantName",
           "label": "Tenant",
-          "type": "input",
-          "inputType": "text",
-          "placeholder": "Tenant name",
+          "type": "select",
+          "placeholder": "Select Tenant",
+          "options": [],
+          "required": true,
           "colSpan": "col-1"
         },
         {

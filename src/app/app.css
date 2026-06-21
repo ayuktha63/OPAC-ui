@@ -90,62 +90,6 @@
   border-color: #d1d5db;
 }
 
-.login-input-field {
-  width: 100%;
-  padding: 0.8rem 1rem;
-  margin-top: 16px;
-  font-size: 14px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  background: #f9fafb;
-  font-family: inherit;
-}
-
-.login-input-field:focus {
-  outline: none;
-  border-color: #15104e;
-  background: #ffffff;
-}
-
-.login-password-wrapper {
-  display: flex;
-  align-items: center;
-  border: 1px solid #ccc;
-  margin-top: 16px;
-  border-radius: 6px;
-  background: #f9fafb;
-  padding-right: 10px;
-}
-
-.login-password-input {
-  flex: 1;
-  padding: 0.8rem 1rem;
-  font-size: 14px;
-  border: none;
-  background: transparent;
-  font-family: inherit;
-}
-
-.login-password-input:focus {
-  outline: none;
-}
-
-.login-password-wrapper svg {
-  cursor: pointer;
-  fill: #6b7280;
-}
-
-.login-pwd-toggle {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  padding-left: 5px;
-  color: #6b7280;
-  flex-shrink: 0;
-  transition: color 0.15s;
-}
-
-.login-pwd-toggle:hover { color: #15104e; }
 
 .login-extras {
   display: flex;
@@ -186,8 +130,20 @@
   transition: background 0.2s;
 }
 
-.login-button-orange:hover {
+.login-button-orange:hover:not(:disabled) {
   background-color: #e07200;
+}
+
+.login-button-orange:disabled {
+  background-color: #cc6600;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Sub-role selector (radio pill group) */
@@ -238,6 +194,131 @@
   border-color: #15104e;
   background: #f0effe;
   color: #15104e;
+}
+
+/* Login Mode Tabs */
+.login-mode-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 1.5rem;
+  margin-top: 1rem;
+}
+
+.login-mode-tab {
+  padding: 0.8rem 1rem;
+  border: 2px solid #d1d5db;
+  border-radius: 6px;
+  background-color: #ffffff;
+  color: #4b5563;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.login-mode-tab:hover {
+  border-color: #15104e;
+}
+
+.login-mode-tab.active {
+  background-color: #15104e;
+  color: #ffffff;
+  border-color: #15104e;
+}
+
+/* Login Form Fields */
+.login-form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.login-input-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+
+.login-input-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+
+.login-input-field {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: #f9fafb;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.login-input-field:focus {
+  outline: none;
+  border-color: #15104e;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(21, 16, 78, 0.1);
+}
+
+.login-password-wrapper {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #f9fafb;
+  padding-right: 10px;
+  transition: all 0.2s;
+}
+
+.login-password-wrapper:focus-within {
+  border-color: #15104e;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(21, 16, 78, 0.1);
+}
+
+.login-password-input {
+  flex: 1;
+  padding: 0.8rem 1rem;
+  font-size: 14px;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+}
+
+.login-password-input:focus {
+  outline: none;
+}
+
+.login-pwd-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  color: #6b7280;
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+
+.login-pwd-toggle:hover,
+.login-pwd-toggle:focus {
+  color: #15104e;
+  outline: none;
+}
+
+.login-pwd-toggle svg {
+  stroke: currentColor;
 }
 
 /* =========================================================================

@@ -1,5 +1,6 @@
 import {
   ChangeDetectorRef,
+  ChangeDetectionStrategy,
   Component,
   Input,
   OnChanges,
@@ -25,7 +26,8 @@ import { PageStoreService } from '../../core/page-store.service';
   standalone: true,
   imports: [FormsModule, PageRendererComponent],
   templateUrl: './list-page.component.html',
-  styleUrls: ['./list-page.component.css']
+  styleUrls: ['./list-page.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ListPageComponent implements OnInit, OnChanges, OnDestroy {
   @Input() resource: string = '';
@@ -52,6 +54,8 @@ export class ListPageComponent implements OnInit, OnChanges, OnDestroy {
   private _toastTimer: any = null;
 
   private _routeSub?: Subscription;
+  /** Resource that has been loaded — used to reload when the @Input resource changes */
+  private _loadedResource: string | null = null;
 
   constructor(
     private readonly store: PageStoreService,
@@ -62,14 +66,8 @@ export class ListPageComponent implements OnInit, OnChanges, OnDestroy {
   ) {}
 
   ngOnInit() {
-    // Check if user is logged in
-    const sessionData = sessionStorage.getItem('opac_session');
-    if (!sessionData) {
-      this.router.navigate(['/login']);
-      return;
-    }
-
-    const storedRole = sessionStorage.getItem('opac_role');
+    console.log(`🔧 ListPageComponent.ngOnInit() called for resource: ${this.resource}`);
+    const storedRole = localStorage.getItem('opac_role');
     if (storedRole && ['SYSTEM_ADMIN', 'APPROVER', 'REQUESTER', 'VIEWER'].includes(storedRole)) {
       this.userRole = storedRole as UserRole;
     }
@@ -81,8 +79,9 @@ export class ListPageComponent implements OnInit, OnChanges, OnDestroy {
     this._routeSub = this.route.params.subscribe(params => {
       const tabParam = params['tab'];
       if (tabParam) {
+        console.log(`📍 Route param changed: ${tabParam}`);
         this.activeTab = tabParam;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
 
@@ -90,10 +89,23 @@ export class ListPageComponent implements OnInit, OnChanges, OnDestroy {
     if (tabSnap) {
       this.activeTab = tabSnap;
     }
+
+    // Load page config if a resource is provided and not already loaded.
+    // (ngOnChanges normally fires first and loads it, but guard here too.)
+    if (this.resource && this._loadedResource !== this.resource) {
+      console.log(`🚀 Calling loadPage() from ngOnInit`);
+      this._loadedResource = this.resource;
+      this.loadPage();
+    }
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['resource'] && this.resource) {
+    // Reload whenever the resource input genuinely changes to a new value.
+    // This is what lets the System Settings page swap between users/roles/
+    // sessions/audits/tenant-configuration on the same component instance.
+    if (changes['resource'] && this.resource && this._loadedResource !== this.resource) {
+      console.log(`📌 loadPage() from ngOnChanges (resource = ${this.resource})`);
+      this._loadedResource = this.resource;
       this.loadPage();
     }
   }
@@ -106,50 +118,75 @@ export class ListPageComponent implements OnInit, OnChanges, OnDestroy {
   // ── Page Load ──────────────────────────────────────────────────────────────
 
   loadPage() {
+    console.log(`📄 Loading page config for: ${this.resource}`);
     this.loading = true;
     this.error = null;
     this.page = null;
     this.data = [];
+    this.cdr.markForCheck();
 
     this.store.getPageConfig(this.resource).subscribe({
       next: (config: PageConfig) => {
+        console.log(`✅ Page config loaded, now fetching data from: ${config.api}`);
         this.page = config;
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
+        this.populateTenantOptions(config);
         this.loadData(config.api);
       },
       error: (err) => {
-        this.error = `Failed to load page config for "${this.resource}": ${err.message}`;
+        console.error(`❌ Failed to load page config:`, err.message);
+        this.error = `Failed to load page config: ${err.message}`;
         this.loading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
 
   loadData(api: string) {
+    console.log(`📊 Fetching data from: ${api}`);
     this.loading = true;
-    const tenantId = sessionStorage.getItem('opac_tenant_id');
-    const headers = tenantId ? { 'x-tenant-id': tenantId } : {};
+    this.cdr.markForCheck();
 
-    this.store.getList(api, headers).subscribe({
+    this.store.getList(api).subscribe({
       next: (rows) => {
-        // Filter data by tenant if available
-        if (tenantId && rows) {
-          this.data = rows.filter((row: any) =>
-            row.tenantUuid === tenantId || row.uuid === tenantId
-          );
-        } else {
-          this.data = rows ?? [];
-        }
+        console.log(`✅ Data loaded! Rows: ${rows?.length || 0}`);
+        this.data = rows ?? [];
         this.loading = false;
-        this.cdr.detectChanges();
+        this.error = null;
+        this.cdr.markForCheck();
+        console.log(`✨ UI should now show data table (loading=${this.loading})`);
       },
       error: (err) => {
-        console.error('[ListPage] failed to fetch data:', err);
+        console.error(`❌ Failed to fetch data:`, err.message);
+        this.error = `Failed to load data: ${err.message}`;
         this.data = [];
         this.loading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
+    });
+  }
+
+  /**
+   * If the page's form has a "tenantName" select field, fill its options with the
+   * list of tenants so the Orque super admin can assign records to a tenant.
+   * (Backend still forces a tenant-scoped admin's records to their own tenant.)
+   */
+  private populateTenantOptions(config: PageConfig) {
+    const tenantFields = (config?.steps || [])
+      .flatMap(step => step.fields || [])
+      .filter(field => field.name === 'tenantName' && field.type === 'select');
+    if (tenantFields.length === 0) return;
+
+    this.store.getList('/active-tenants').subscribe({
+      next: (tenants) => {
+        const options = (tenants || []).map((tenant: any) => ({
+          label: tenant.label || tenant.tenantName || tenant.value,
+          value: tenant.label || tenant.tenantName || tenant.value
+        }));
+        tenantFields.forEach(field => (field.options = options));
+        this.cdr.markForCheck();
+      },
+      error: (err) => console.error('Failed to load tenant options:', err.message)
     });
   }
 

@@ -1,12 +1,5 @@
 <div class="lp-container">
 
-  @if (loading) {
-  <div class="lp-loading">
-    <span class="lp-spinner"></span>
-    <span>Loading {{ resource }}...</span>
-  </div>
-  }
-
   @if (error) {
   <div class="lp-error">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -17,9 +10,12 @@
     </svg>
     <span>{{ error }}</span>
   </div>
-  }
-
-  @if (page && !error) {
+  } @else if (loading || !page) {
+  <div class="lp-loading">
+    <span class="lp-spinner"></span>
+    <span>Loading {{ resource }}...</span>
+  </div>
+  } @else {
   <o-page-renderer
     [page]="page"
     [data]="data"

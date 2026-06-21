@@ -111,6 +111,15 @@
           "colSpan": "col-1"
         },
         {
+          "name": "tenantName",
+          "label": "Tenant",
+          "type": "select",
+          "placeholder": "Select Tenant",
+          "options": [],
+          "required": true,
+          "colSpan": "col-1"
+        },
+        {
           "name": "description",
           "label": "Description",
           "type": "textarea",

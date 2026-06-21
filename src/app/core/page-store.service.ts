@@ -2,35 +2,52 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { tap } from 'rxjs/operators';
+import { TenantContextService } from './tenant-context.service';
 
 @Injectable({ providedIn: 'root' })
 export class PageStoreService {
   private readonly backendUrl = 'http://localhost:8082';
-  private readonly defaultHeaders = { 'x-user': 'opac-admin' };
 
   /** In-memory config cache — avoids repeated asset fetches on tab switches */
   private readonly configCache = new Map<string, any>();
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private readonly http: HttpClient,
+    private readonly tenantContextSvc: TenantContextService
+  ) {}
+
+  /**
+   * Builds the standard request headers for every backend call:
+   *  - x-user        → the logged-in username (drives audit attribution)
+   *  - x-tenant-uuid → the active tenant (drives data isolation on reads AND writes)
+   */
+  private buildHeaders(): HttpHeaders {
+    const tenantUuid = this.tenantContextSvc.getTenantUuid();
+    let username = 'opac-admin';
+    try {
+      const user = JSON.parse(localStorage.getItem('opac_user') || '{}');
+      if (user?.username) username = user.username;
+    } catch { /* ignore malformed storage */ }
+
+    return new HttpHeaders({
+      'x-user': username,
+      ...(tenantUuid && { 'x-tenant-uuid': tenantUuid })
+    });
+  }
 
   /** Fetch all records for a given API path */
-  getList(apiPath: string, customHeaders?: any): Observable<any[]> {
-    const headers = customHeaders ? new HttpHeaders(customHeaders) : undefined;
-    return this.http.get<any[]>(`${this.backendUrl}${apiPath}`, { headers });
+  getList(apiPath: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.backendUrl}${apiPath}`, { headers: this.buildHeaders() });
   }
 
   /** POST — create new record or trigger a workflow action */
   post(apiPath: string, payload: any): Observable<any> {
-    return this.http.post(`${this.backendUrl}${apiPath}`, payload, {
-      headers: new HttpHeaders(this.defaultHeaders)
-    });
+    return this.http.post(`${this.backendUrl}${apiPath}`, payload, { headers: this.buildHeaders() });
   }
 
   /** PUT — update an existing record */
   put(apiPath: string, payload: any): Observable<any> {
-    return this.http.put(`${this.backendUrl}${apiPath}`, payload, {
-      headers: new HttpHeaders(this.defaultHeaders)
-    });
+    return this.http.put(`${this.backendUrl}${apiPath}`, payload, { headers: this.buildHeaders() });
   }
 
   /** Load a JSON page config from assets — cached after first load */
