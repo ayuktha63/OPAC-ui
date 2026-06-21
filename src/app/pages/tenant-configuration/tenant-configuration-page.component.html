@@ -1,1 +1,75 @@
-<app-list-page [resource]="'tenant-configuration'"></app-list-page>
+<div class="tc-wrap">
+
+  <div class="tc-head">
+    <h2 class="tc-title">Tenant Configuration</h2>
+    <span class="tc-tenant" *ngIf="tenantName">{{ tenantName }}</span>
+  </div>
+
+  <!-- Orque platform owner: nothing to apply here -->
+  <div class="tc-card tc-note" *ngIf="isPlatformOwner">
+    <div class="tc-note-icon">ⓘ</div>
+    <div>
+      <div class="tc-note-title">Orque is the platform owner</div>
+      <p class="tc-note-text">
+        Orque <strong>generates</strong> licenses for tenants and emails them the license key.
+        There is no license to apply here. Use the <strong>License Lifecycle</strong> module to
+        create and issue tenant licenses.
+      </p>
+    </div>
+  </div>
+
+  <ng-container *ngIf="!isPlatformOwner">
+
+    <!-- Current license summary -->
+    <div class="tc-card">
+      <div class="tc-card-title">Current Licensed Products</div>
+      <div class="tc-current" *ngIf="currentSummary; else noLicense">
+        <span class="tc-chip" *ngFor="let p of currentSummary.split(',')">{{ p.trim() }}</span>
+      </div>
+      <ng-template #noLicense>
+        <p class="tc-muted">No license applied yet. Paste your license key below to activate your products.</p>
+      </ng-template>
+    </div>
+
+    <!-- Add license — available to System Admin (Orque master key) and business users (their own key) -->
+    <div class="tc-card">
+      <div class="tc-card-title">Add License</div>
+      <p class="tc-muted">Paste the license key you were given, then click <strong>Add License</strong>.</p>
+      <textarea
+        class="tc-key"
+        rows="5"
+        [(ngModel)]="licenseKey"
+        placeholder="Paste your encrypted license key here..."></textarea>
+      <div class="tc-actions">
+        <button class="tc-btn tc-btn-primary" [disabled]="applying" (click)="addLicense()">
+          {{ applying ? 'Decrypting…' : 'Add License' }}
+        </button>
+        <button class="tc-btn tc-btn-ghost" [disabled]="applying" (click)="clear()">Clear</button>
+      </div>
+    </div>
+
+    <!-- Licensed product details — always shown for every non-Orque tenant (all roles) -->
+    <div class="tc-card" *ngIf="products.length">
+      <div class="tc-card-title">License Details</div>
+      <div class="tc-products">
+        <div class="tc-product" *ngFor="let prod of products">
+          <div class="tc-product-head">
+            <span class="tc-product-name">{{ prod.productName }}</span>
+            <span class="tc-product-users" *ngIf="prod.userLimit != null">
+              {{ prod.issued || 0 }}/{{ prod.userLimit }} used
+            </span>
+          </div>
+          <div class="tc-product-dates">
+            <span *ngIf="prod.endDate">Expires: {{ prod.endDate }}</span>
+            <span *ngIf="prod.remaining != null"> · {{ prod.remaining }} licenses available</span>
+          </div>
+          <div class="tc-features" *ngIf="prod.features?.length">
+            <span class="tc-feature" *ngFor="let f of prod.features">{{ f }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </ng-container>
+
+</div>

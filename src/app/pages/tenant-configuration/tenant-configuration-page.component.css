@@ -1,1 +1,94 @@
 :host { display: block; height: 100%; }
+
+.tc-wrap { padding: 24px; max-width: 920px; margin: 0 auto; }
+
+.tc-head { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.tc-title { font-size: 1.35rem; font-weight: 700; color: #15104e; margin: 0; }
+.tc-tenant {
+  font-size: 0.78rem; font-weight: 600; color: #ff8200;
+  background: #fff4e8; border: 1px solid #ffd9b3; border-radius: 999px; padding: 3px 12px;
+}
+
+.tc-card {
+  background: #fff; border: 1px solid #e8eaf0; border-radius: 14px;
+  padding: 20px 22px; margin-bottom: 18px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+.tc-card-title {
+  font-size: 0.95rem; font-weight: 700; color: #1e293b; margin-bottom: 12px;
+  display: flex; align-items: center; gap: 10px;
+}
+.tc-muted { color: #64748b; font-size: 0.85rem; margin: 6px 0 14px; }
+
+.tc-note { display: flex; gap: 14px; align-items: flex-start; background: #f5f7ff; border-color: #d9e0ff; }
+.tc-note-icon { font-size: 1.4rem; color: #4F46E5; }
+.tc-note-title { font-weight: 700; color: #312e81; margin-bottom: 4px; }
+.tc-note-text { color: #475569; font-size: 0.85rem; margin: 0; line-height: 1.5; }
+
+.tc-current { display: flex; flex-wrap: wrap; gap: 8px; }
+.tc-chip {
+  background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;
+  border-radius: 999px; padding: 4px 14px; font-size: 0.8rem; font-weight: 600;
+}
+
+.tc-key {
+  width: 100%; box-sizing: border-box; resize: vertical;
+  border: 1px solid #cbd5e1; border-radius: 10px; padding: 12px 14px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.82rem;
+  color: #1e293b; background: #f8fafc;
+}
+.tc-key:focus { outline: none; border-color: #4F46E5; background: #fff; }
+
+.tc-actions { display: flex; gap: 10px; margin-top: 14px; }
+.tc-btn {
+  border: none; border-radius: 9px; padding: 9px 20px; font-size: 0.85rem;
+  font-weight: 600; cursor: pointer; transition: filter 0.15s;
+}
+.tc-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.tc-btn-primary { background: #ff8200; color: #fff; }
+.tc-btn-primary:hover:not(:disabled) { filter: brightness(0.95); }
+.tc-btn-ghost { background: #f1f5f9; color: #475569; }
+
+.tc-badge {
+  font-size: 0.72rem; font-weight: 600; color: #4F46E5;
+  background: #eef2ff; border-radius: 6px; padding: 2px 8px;
+}
+.tc-meta { display: flex; gap: 18px; font-size: 0.82rem; color: #64748b; margin-bottom: 14px; }
+
+.tc-products { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+.tc-product {
+  border: 1px solid #e8eaf0; border-radius: 12px; padding: 14px 16px;
+  background: linear-gradient(180deg, #ffffff, #fbfcff);
+}
+.tc-product-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.tc-product-name { font-weight: 700; color: #15104e; font-size: 0.95rem; }
+.tc-product-users {
+  font-size: 0.72rem; font-weight: 600; color: #ff8200;
+  background: #fff4e8; border-radius: 6px; padding: 2px 8px;
+}
+.tc-product-dates { font-size: 0.78rem; color: #64748b; margin-bottom: 8px; }
+/* Generate sub-license */
+.tc-gen-products { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 16px; }
+.tc-check { display: flex; align-items: center; gap: 7px; font-size: 0.85rem; color: #334155; cursor: pointer; }
+.tc-check input { width: 16px; height: 16px; accent-color: #ff8200; }
+
+.tc-gen-row { display: flex; gap: 14px; align-items: flex-end; flex-wrap: wrap; }
+.tc-field { display: flex; flex-direction: column; gap: 5px; }
+.tc-grow { flex: 1; min-width: 200px; }
+.tc-label { font-size: 0.75rem; font-weight: 600; color: #475569; }
+.tc-input {
+  border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 12px; font-size: 0.85rem;
+  color: #1e293b; background: #fff; box-sizing: border-box; width: 100%;
+}
+.tc-input:focus { outline: none; border-color: #4F46E5; }
+.tc-gen-btn { height: 38px; white-space: nowrap; }
+
+.tc-genkey { margin-top: 16px; }
+.tc-genkey-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 0.8rem; font-weight: 600; color: #475569; }
+.tc-copy { padding: 5px 14px; }
+
+.tc-features { display: flex; flex-wrap: wrap; gap: 6px; }
+.tc-feature {
+  font-size: 0.72rem; color: #334155; background: #f1f5f9;
+  border-radius: 6px; padding: 2px 8px;
+}

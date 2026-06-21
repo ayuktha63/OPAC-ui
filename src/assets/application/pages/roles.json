@@ -62,24 +62,7 @@
       "pipe": "date"
     }
   ],
-  "contextMenuActions": [
-    {
-      "label": "View Details",
-      "action": "view"
-    },
-    {
-      "label": "Edit Role",
-      "action": "edit"
-    },
-    {
-      "label": "Manage Permissions",
-      "action": "permissions"
-    },
-    {
-      "label": "Delete Role",
-      "action": "delete"
-    }
-  ],
+  "contextMenuActions": [],
   "tableTool": {
     "add": true,
     "edit": true,

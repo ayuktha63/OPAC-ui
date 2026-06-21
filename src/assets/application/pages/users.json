@@ -87,6 +87,13 @@
       "showWhen": [
         "INACTIVE"
       ]
+    },
+    {
+      "label": "Share Credentials",
+      "action": "share",
+      "showWhen": [
+        "ACTIVE"
+      ]
     }
   ],
   "tableTool": {

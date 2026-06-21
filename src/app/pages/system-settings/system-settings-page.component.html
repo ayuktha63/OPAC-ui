@@ -1,1 +1,5 @@
-<app-list-page [resource]="settingsSvc.activeResource()"></app-list-page>
+@if (settingsSvc.activeResource() === 'tenant-configuration') {
+  <app-tenant-configuration-page></app-tenant-configuration-page>
+} @else {
+  <app-list-page [resource]="settingsSvc.activeResource()"></app-list-page>
+}

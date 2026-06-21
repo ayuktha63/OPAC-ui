@@ -1,1 +1,11 @@
+<!-- Live license counter (tenant System Admin only) -->
+<div class="lic-counter" *ngIf="isTenantAdmin && quotas.length">
+  <span class="lic-counter-label">User licenses remaining:</span>
+  <span class="lic-counter-item" *ngFor="let q of quotas">
+    {{ q.productName }}
+    <strong [class.zero]="q.remaining <= 0">{{ q.remaining }}/{{ q.purchased }}</strong>
+  </span>
+  <button class="lic-counter-refresh" type="button" (click)="loadQuota()" title="Refresh">↻</button>
+</div>
+
 <app-list-page [resource]="'license'" [initialTab]="activeTab"></app-list-page>
