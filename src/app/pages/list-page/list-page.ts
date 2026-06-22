@@ -177,13 +177,20 @@ export class ListPageComponent implements OnInit, OnChanges, OnDestroy {
       .filter(field => field.name === 'tenantName' && field.type === 'select');
     if (tenantFields.length === 0) return;
 
-    this.store.getList('/active-tenants').subscribe({
+    // Non-Orque tenants don't choose a tenant — it's their own, pre-filled and locked.
+    const tenantName = (localStorage.getItem('opac_tenant_name') || '').trim();
+    const isTenantScoped = !!tenantName && tenantName.toLowerCase() !== 'orque';
+
+    this.store.getList('/api/active-tenants').subscribe({
       next: (tenants) => {
         const options = (tenants || []).map((tenant: any) => ({
           label: tenant.label || tenant.tenantName || tenant.value,
           value: tenant.label || tenant.tenantName || tenant.value
         }));
-        tenantFields.forEach(field => (field.options = options));
+        tenantFields.forEach(field => {
+          field.options = options;
+          if (isTenantScoped) (field as any).isDisabled = true;
+        });
         this.cdr.markForCheck();
       },
       error: (err) => console.error('Failed to load tenant options:', err.message)
