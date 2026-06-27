@@ -1,11 +1,23 @@
-<!-- Live license counter (tenant System Admin only) -->
-<div class="lic-counter" *ngIf="isTenantAdmin && quotas.length">
-  <span class="lic-counter-label">User licenses remaining:</span>
-  <span class="lic-counter-item" *ngFor="let q of quotas">
-    {{ q.productName }}
-    <strong [class.zero]="q.remaining <= 0">{{ q.remaining }}/{{ q.purchased }}</strong>
-  </span>
-  <button class="lic-counter-refresh" type="button" (click)="loadQuota()" title="Refresh">↻</button>
-</div>
+<!-- Quota banner — visible to non-ORQUE System Admins only -->
+@if (isTenantAdmin && quotas.length) {
+  <div class="lic-quota-bar">
+    <span class="lic-quota-label">License quota:</span>
+    @for (q of quotas; track q.productName) {
+      <span class="lic-quota-chip" [class.lic-quota-chip--zero]="q.remaining <= 0">
+        <span class="lic-quota-chip-name">{{ q.productName }}</span>
+        <strong>{{ q.remaining }}/{{ q.purchased }}</strong>
+        remaining
+      </span>
+    }
+    <button class="lic-refresh-btn" type="button" (click)="loadQuota()" title="Refresh quota">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+           stroke-linecap="round" stroke-linejoin="round" [class.lic-spin]="loadingQuota">
+        <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+      </svg>
+    </button>
+  </div>
+}
 
+<!-- Approval workflow — same for ORQUE and non-ORQUE System Admins -->
 <app-list-page [resource]="'license'" [initialTab]="activeTab"></app-list-page>

@@ -20,6 +20,8 @@ export interface LoginResponse {
     role: string;
     tenantUuid?: string;
     tenantName?: string;
+    isPlatformOwner?: boolean;
+    hasActiveLicense?: boolean;
   };
 }
 

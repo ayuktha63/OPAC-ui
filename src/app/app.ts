@@ -8,6 +8,7 @@ import { SystemSettingsService } from './core/system-settings.service';
 import { TenantContextService } from './core/tenant-context.service';
 import { AuthService } from './core/auth.service';
 import { ToastService } from './core/toast.service';
+import { PageStoreService } from './core/page-store.service';
 
 @Component({
   selector: 'app-root',
@@ -57,11 +58,24 @@ export class App implements OnInit {
     readonly settingsSvc: SystemSettingsService,
     private readonly tenantContextSvc: TenantContextService,
     private readonly authSvc: AuthService,
-    private readonly toastSvc: ToastService
+    private readonly toastSvc: ToastService,
+    private readonly pageStore: PageStoreService
   ) {}
 
   ngOnInit() {
     this.loadActiveTenants();
+  }
+
+  get isPlatformOwner(): boolean {
+    return this.tenantContextSvc.isPlatformOwner();
+  }
+
+  get isSystemAdmin(): boolean {
+    return this.tenantContextSvc.isSystemAdmin();
+  }
+
+  get isBusinessUser(): boolean {
+    return this.tenantContextSvc.isBusinessUser();
   }
 
   get roleDisplayLabel(): string {
@@ -105,6 +119,9 @@ export class App implements OnInit {
 
         if (response.success && response.data) {
           console.log('✨ Login successful! Setting up user context...');
+          // Drop any cached page configs from a previous session so tenant/requester
+          // options don't leak between logins (e.g. AKRO's requesters showing for Orque).
+          this.pageStore.clearConfigCache();
           this.toastSvc.success('Login successful!');
           this.userRole = response.data.role;
           this.activeTenant = {
@@ -114,18 +131,28 @@ export class App implements OnInit {
           };
           console.log('📍 Active tenant set to:', this.activeTenant);
 
+          const tenantName = response.data.tenantName || '';
           this.tenantContextSvc.setTenantContext(
             response.data.tenantUuid || '',
+            tenantName,
             this.loginMode,
-            this.userRole
+            this.userRole,
+            !!response.data.hasActiveLicense
           );
 
           this.isLoggedIn = true;
           this.cdr.detectChanges();
-          console.log('✅ isLoggedIn set to true, navigating to /tenant');
-          this.router.navigate(['/tenant']).then(success => {
-            console.log('🚀 Navigation result:', success);
-          });
+
+          // Route each user type to their appropriate home screen
+          let homeRoute: string;
+          if (tenantName.trim().toLowerCase() === 'orque') {
+            homeRoute = '/tenant';
+          } else if (this.userRole === 'SYSTEM_ADMIN') {
+            homeRoute = '/license';
+          } else {
+            homeRoute = '/tenant-configuration';
+          }
+          this.router.navigate([homeRoute]);
           this.logSession();
         } else {
           console.error('❌ Response not successful:', response);
@@ -144,6 +171,7 @@ export class App implements OnInit {
   onLogout() {
     this.authSvc.logout();
     this.tenantContextSvc.clearContext();
+    this.pageStore.clearConfigCache();
     this.isLoggedIn   = false;
     this.username     = '';
     this.password     = '';

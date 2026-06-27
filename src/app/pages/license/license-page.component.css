@@ -1,27 +1,65 @@
-:host {
-  display: block;
-  height: 100%;
-}
+:host { display: block; height: 100%; }
 
-.lic-counter {
+/* ── Quota banner ────────────────────────────────────────────────────────── */
+.lic-quota-bar {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 14px;
+  gap: 10px;
   margin: 12px 16px 0;
   padding: 10px 16px;
   background: #fff;
   border: 1px solid #e8eaf0;
   border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 2px 8px rgba(15,23,42,0.04);
 }
-.lic-counter-label { font-size: 0.8rem; font-weight: 700; color: #475569; }
-.lic-counter-item { font-size: 0.82rem; color: #15104e; font-weight: 600; }
-.lic-counter-item strong {
-  background: #ecfdf5; color: #047857; border-radius: 6px; padding: 2px 8px; margin-left: 4px;
+
+.lic-quota-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #475569;
 }
-.lic-counter-item strong.zero { background: #fef2f2; color: #b91c1c; }
-.lic-counter-refresh {
-  margin-left: auto; border: none; background: #f1f5f9; color: #475569;
-  border-radius: 7px; width: 28px; height: 28px; cursor: pointer; font-size: 0.95rem;
+
+.lic-quota-chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.78rem;
+  color: #334155;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 99px;
+  padding: 3px 10px;
 }
+.lic-quota-chip--zero {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+.lic-quota-chip-name { font-weight: 700; }
+
+.lic-quota-chip strong {
+  font-weight: 800;
+  color: #047857;
+}
+.lic-quota-chip--zero strong { color: #b91c1c; }
+
+.lic-refresh-btn {
+  margin-left: auto;
+  border: none;
+  background: #f1f5f9;
+  color: #475569;
+  border-radius: 7px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.lic-refresh-btn:hover { background: #e2e8f0; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.lic-spin { animation: spin 0.7s linear infinite; }

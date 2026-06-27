@@ -29,8 +29,10 @@ export class PageStoreService {
       if (user?.username) username = user.username;
     } catch { /* ignore malformed storage */ }
 
+    const role = localStorage.getItem('opac_role') || '';
     return new HttpHeaders({
       'x-user': username,
+      'x-role': role,
       ...(tenantUuid && { 'x-tenant-uuid': tenantUuid })
     });
   }
@@ -64,5 +66,14 @@ export class PageStoreService {
   /** Invalidate a specific cached config (call after saving page-level config changes) */
   invalidateConfig(resource: string): void {
     this.configCache.delete(resource);
+  }
+
+  /**
+   * Clear ALL cached configs. Must be called on login/logout — the renderer mutates
+   * config field objects (tenant/requester options, disabled flags) per logged-in tenant,
+   * so a stale cached config would leak one tenant's options into another's session.
+   */
+  clearConfigCache(): void {
+    this.configCache.clear();
   }
 }

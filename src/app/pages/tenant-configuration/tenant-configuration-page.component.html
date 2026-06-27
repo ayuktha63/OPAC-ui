@@ -1,75 +1,256 @@
-<div class="tc-wrap">
+<div class="tc-page">
 
-  <div class="tc-head">
-    <h2 class="tc-title">Tenant Configuration</h2>
-    <span class="tc-tenant" *ngIf="tenantName">{{ tenantName }}</span>
-  </div>
-
-  <!-- Orque platform owner: nothing to apply here -->
-  <div class="tc-card tc-note" *ngIf="isPlatformOwner">
-    <div class="tc-note-icon">ⓘ</div>
-    <div>
-      <div class="tc-note-title">Orque is the platform owner</div>
-      <p class="tc-note-text">
-        Orque <strong>generates</strong> licenses for tenants and emails them the license key.
-        There is no license to apply here. Use the <strong>License Lifecycle</strong> module to
-        create and issue tenant licenses.
-      </p>
-    </div>
-  </div>
-
-  <ng-container *ngIf="!isPlatformOwner">
-
-    <!-- Current license summary -->
-    <div class="tc-card">
-      <div class="tc-card-title">Current Licensed Products</div>
-      <div class="tc-current" *ngIf="currentSummary; else noLicense">
-        <span class="tc-chip" *ngFor="let p of currentSummary.split(',')">{{ p.trim() }}</span>
+  <!-- ── ORQUE Platform Owner ─────────────────────────────────────────────── -->
+  @if (isPlatformOwner) {
+    <div class="tc-wrap">
+      <div class="tc-head">
+        <h2 class="tc-title">Tenant Configuration</h2>
+        <span class="tc-tenant-badge">Orque</span>
       </div>
-      <ng-template #noLicense>
-        <p class="tc-muted">No license applied yet. Paste your license key below to activate your products.</p>
-      </ng-template>
-    </div>
-
-    <!-- Add license — available to System Admin (Orque master key) and business users (their own key) -->
-    <div class="tc-card">
-      <div class="tc-card-title">Add License</div>
-      <p class="tc-muted">Paste the license key you were given, then click <strong>Add License</strong>.</p>
-      <textarea
-        class="tc-key"
-        rows="5"
-        [(ngModel)]="licenseKey"
-        placeholder="Paste your encrypted license key here..."></textarea>
-      <div class="tc-actions">
-        <button class="tc-btn tc-btn-primary" [disabled]="applying" (click)="addLicense()">
-          {{ applying ? 'Decrypting…' : 'Add License' }}
-        </button>
-        <button class="tc-btn tc-btn-ghost" [disabled]="applying" (click)="clear()">Clear</button>
-      </div>
-    </div>
-
-    <!-- Licensed product details — always shown for every non-Orque tenant (all roles) -->
-    <div class="tc-card" *ngIf="products.length">
-      <div class="tc-card-title">License Details</div>
-      <div class="tc-products">
-        <div class="tc-product" *ngFor="let prod of products">
-          <div class="tc-product-head">
-            <span class="tc-product-name">{{ prod.productName }}</span>
-            <span class="tc-product-users" *ngIf="prod.userLimit != null">
-              {{ prod.issued || 0 }}/{{ prod.userLimit }} used
-            </span>
-          </div>
-          <div class="tc-product-dates">
-            <span *ngIf="prod.endDate">Expires: {{ prod.endDate }}</span>
-            <span *ngIf="prod.remaining != null"> · {{ prod.remaining }} licenses available</span>
-          </div>
-          <div class="tc-features" *ngIf="prod.features?.length">
-            <span class="tc-feature" *ngFor="let f of prod.features">{{ f }}</span>
-          </div>
+      <div class="tc-card tc-note">
+        <div class="tc-note-icon">ⓘ</div>
+        <div>
+          <div class="tc-note-title">Orque is the platform owner</div>
+          <p class="tc-note-text">
+            Orque <strong>generates</strong> licenses for tenants and emails them the license key.
+            There is no license to apply here. Use the <strong>License Lifecycle</strong> module to
+            create and issue tenant licenses.
+          </p>
         </div>
       </div>
     </div>
+  }
 
-  </ng-container>
+  <!-- ── System Admin view ────────────────────────────────────────────────── -->
+  @if (isSystemAdmin && !isPlatformOwner) {
+    <div class="tc-wrap">
+      <div class="tc-head">
+        <h2 class="tc-title">Tenant Configuration</h2>
+        @if (tenantName) { <span class="tc-tenant-badge">{{ tenantName }}</span> }
+      </div>
+
+      <!-- Current license chips -->
+      <div class="tc-card">
+        <div class="tc-card-title">Licensed Products</div>
+        @if (currentSummary) {
+          <div class="tc-chips">
+            @for (p of currentSummary.split(','); track p) {
+              <span class="tc-chip">{{ p.trim() }}</span>
+            }
+          </div>
+        } @else {
+          <p class="tc-muted">No license applied yet.</p>
+        }
+      </div>
+
+      <!-- Apply license key -->
+      <div class="tc-card">
+        <div class="tc-card-title">Apply License Key</div>
+        <p class="tc-muted">Paste the license key received from Orque, then click <strong>Add License</strong>.</p>
+        <textarea id="admin-license-key" class="tc-key" rows="5" [(ngModel)]="licenseKey"
+          aria-label="License key" placeholder="Paste encrypted license key here…"></textarea>
+        <div class="tc-actions">
+          <button class="tc-btn tc-btn-primary" [disabled]="applying" (click)="addLicense()">
+            {{ applying ? 'Activating…' : 'Add License' }}
+          </button>
+          <button class="tc-btn tc-btn-ghost" [disabled]="applying" (click)="clear()">Clear</button>
+        </div>
+      </div>
+
+      <!-- Product detail cards -->
+      @if (products.length) {
+        <div class="tc-card">
+          <div class="tc-card-title">License Details</div>
+          <div class="tc-products">
+            @for (prod of products; track prod.productName) {
+              <div class="tc-product">
+                <div class="tc-product-head">
+                  <span class="tc-product-name">{{ prod.productName }}</span>
+                  @if (prod.userLimit != null) {
+                    <span class="tc-product-users">{{ prod.issued || 0 }}/{{ prod.userLimit }} used</span>
+                  }
+                </div>
+                @if (prod.endDate) {
+                  <div class="tc-product-dates">Expires: {{ formatDate(prod.endDate) }}</div>
+                }
+                @if (prod.features?.length) {
+                  <div class="tc-features">
+                    @for (f of prod.features; track f) {
+                      <span class="tc-feature">{{ f }}</span>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ── Business User — Netflix-style subscription UX ────────────────────── -->
+  @if (isBusinessUser) {
+
+    <!-- STATE A: No active license → Activation hero -->
+    @if (!hasActiveLicense && !showAddKeyForm) {
+      <div class="act-hero">
+        <div class="act-glow"></div>
+        <div class="act-inner">
+
+          <div class="act-icon-wrap">
+            <svg class="act-icon-svg" viewBox="0 0 48 48" fill="none">
+              <circle cx="24" cy="24" r="24" fill="currentColor" opacity="0.08"/>
+              <rect x="14" y="22" width="20" height="15" rx="3" stroke="currentColor" stroke-width="2.2" fill="none"/>
+              <path d="M18 22v-5a6 6 0 1 1 12 0v5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+              <circle cx="24" cy="30" r="2" fill="currentColor"/>
+            </svg>
+          </div>
+
+          <h1 class="act-title">Activate Your Subscription</h1>
+          <p class="act-subtitle">
+            Your administrator has sent you a license key.<br>
+            Paste it below to unlock your products instantly.
+          </p>
+
+          <div class="act-form">
+            <textarea id="act-license-key" class="act-key-input" rows="4" [(ngModel)]="licenseKey"
+              aria-label="License key" placeholder="Paste your license key here…"></textarea>
+            <button class="act-btn" [disabled]="applying" (click)="addLicense()">
+              @if (applying) {
+                <span class="act-spinner"></span>
+                Activating…
+              } @else {
+                Activate Subscription
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              }
+            </button>
+          </div>
+
+          <p class="act-help">Need your license key? Contact your system administrator.</p>
+        </div>
+      </div>
+    }
+
+    <!-- STATE A2: No license but user clicked "Add key" manually — same form inline -->
+    @if (!hasActiveLicense && showAddKeyForm) {
+      <div class="act-hero act-hero--compact">
+        <div class="act-inner">
+          <h1 class="act-title">Enter Your License Key</h1>
+          <div class="act-form">
+            <textarea id="compact-license-key" class="act-key-input" rows="4" [(ngModel)]="licenseKey"
+              aria-label="License key" placeholder="Paste your license key here…"></textarea>
+            <button class="act-btn" [disabled]="applying" (click)="addLicense()">
+              @if (applying) { <span class="act-spinner"></span> Activating… }
+              @else { Activate }
+            </button>
+            <button class="act-btn-ghost" (click)="showAddKeyForm = false; clear()">Cancel</button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- STATE B: Has active subscription → Subscription dashboard -->
+    @if (hasActiveLicense) {
+      <div class="sub-page">
+
+        <!-- Header row -->
+        <div class="sub-header">
+          <div class="sub-header-left">
+            <h2 class="sub-header-title">My Subscriptions</h2>
+            <span class="sub-header-meta">
+              {{ tenantName }} &nbsp;·&nbsp;
+              {{ products.length }} active product{{ products.length !== 1 ? 's' : '' }}
+            </span>
+          </div>
+          <button class="sub-add-key-btn" (click)="showAddKeyForm = !showAddKeyForm">
+            @if (showAddKeyForm) { ✕&nbsp;Cancel } @else { + Add License Key }
+          </button>
+        </div>
+
+        <!-- Inline add-key form (collapsed by default) -->
+        @if (showAddKeyForm) {
+          <div class="sub-add-form">
+            <p class="sub-add-form-label">Paste your new license key below:</p>
+            <textarea id="sub-add-license-key" class="act-key-input sub-add-textarea" rows="3"
+              [(ngModel)]="licenseKey" aria-label="License key"
+              placeholder="Paste license key here…"></textarea>
+            <div class="sub-add-actions">
+              <button class="act-btn sub-act-btn-sm" [disabled]="applying" (click)="addLicense()">
+                {{ applying ? 'Activating…' : 'Activate' }}
+              </button>
+              <button class="act-btn-ghost" (click)="showAddKeyForm = false; clear()">Cancel</button>
+            </div>
+          </div>
+        }
+
+        <!-- Subscription cards grid -->
+        <div class="sub-cards-grid">
+          @for (prod of products; track prod.productName) {
+            <div class="sub-card"
+                 [style.--prod-color]="productColor(prod.productName)"
+                 [style.background]="productGradient(prod.productName)">
+
+              <!-- Card top: logo + status -->
+              <div class="sub-card-top">
+                <div class="sub-card-logo" [style.background]="productColor(prod.productName)">
+                  {{ productInitial(prod.productName) }}
+                </div>
+                <span class="sub-card-active-badge">
+                  <span class="sub-active-dot"></span> Active
+                </span>
+              </div>
+
+              <!-- Product name -->
+              <h3 class="sub-card-name">{{ prod.productName }}</h3>
+              <div class="sub-card-divider" [style.background]="productColor(prod.productName)"></div>
+
+              <!-- Meta row: users · expiry -->
+              <div class="sub-card-meta">
+                @if (prod.userLimit != null) {
+                  <span class="sub-meta-pill">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    {{ prod.userLimit }} users
+                  </span>
+                }
+                @if (prod.endDate) {
+                  <span class="sub-meta-pill">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    Expires {{ formatDate(prod.endDate) }}
+                  </span>
+                }
+              </div>
+
+              <!-- Feature list -->
+              @if (prod.features?.length) {
+                <div class="sub-features-wrap">
+                  <div class="sub-features-label">What's included</div>
+                  @for (f of visibleFeatures(prod.features); track f) {
+                    <div class="sub-feature-row">
+                      <span class="sub-check" [style.color]="productColor(prod.productName)">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      </span>
+                      <span>{{ f }}</span>
+                    </div>
+                  }
+                  @if (extraFeatureCount(prod.features) > 0) {
+                    <div class="sub-feature-more">+ {{ extraFeatureCount(prod.features) }} more</div>
+                  }
+                </div>
+              }
+
+              <!-- Launch button -->
+              <button class="sub-launch-btn" [style.--prod-color]="productColor(prod.productName)">
+                Launch {{ prod.productName }}
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </button>
+
+            </div>
+          }
+        </div>
+
+      </div>
+    }
+
+  }
 
 </div>

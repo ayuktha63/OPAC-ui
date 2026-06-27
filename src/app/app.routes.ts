@@ -1,9 +1,10 @@
 import { Routes } from '@angular/router';
+import { adminOrOwnerGuard, licenseRequiredGuard, platformOwnerGuard } from './core/auth.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/tenant', pathMatch: 'full' },
 
-  // Tenant – tab-param routing
+  // Tenant – ORQUE platform-owner only
   {
     path: 'tenant',
     redirectTo: 'tenant/In-Progress',
@@ -11,11 +12,12 @@ export const routes: Routes = [
   },
   {
     path: 'tenant/:tab',
+    canActivate: [platformOwnerGuard],
     loadComponent: () =>
       import('./pages/tenant/tenant-page.component').then(m => m.TenantPageComponent)
   },
 
-  // License – tab-param routing
+  // License – System Admin + ORQUE only; account must be unlocked
   {
     path: 'license',
     redirectTo: 'license/In-Progress',
@@ -23,11 +25,12 @@ export const routes: Routes = [
   },
   {
     path: 'license/:tab',
+    canActivate: [licenseRequiredGuard, adminOrOwnerGuard],
     loadComponent: () =>
       import('./pages/license/license-page.component').then(m => m.LicensePageComponent)
   },
 
-  // Users – tab-param routing
+  // Users – account must be unlocked
   {
     path: 'users',
     redirectTo: 'users/Active',
@@ -35,32 +38,36 @@ export const routes: Routes = [
   },
   {
     path: 'users/:tab',
+    canActivate: [licenseRequiredGuard],
     loadComponent: () =>
       import('./pages/users/users-page.component').then(m => m.UsersPageComponent)
   },
 
-  // Roles
+  // Roles – account must be unlocked
   {
     path: 'roles',
+    canActivate: [licenseRequiredGuard],
     loadComponent: () =>
       import('./pages/roles/roles-page.component').then(m => m.RolesPageComponent)
   },
 
-  // Sessions
+  // Sessions – account must be unlocked
   {
     path: 'sessions',
+    canActivate: [licenseRequiredGuard],
     loadComponent: () =>
       import('./pages/sessions/sessions-page.component').then(m => m.SessionsPageComponent)
   },
 
-  // Audits
+  // Audits – account must be unlocked
   {
     path: 'audits',
+    canActivate: [licenseRequiredGuard],
     loadComponent: () =>
       import('./pages/audits/audits-page.component').then(m => m.AuditsPageComponent)
   },
 
-  // Tenant Configuration
+  // Tenant Configuration – always accessible (this is where the license key is applied)
   {
     path: 'tenant-configuration',
     loadComponent: () =>
@@ -68,9 +75,10 @@ export const routes: Routes = [
         .then(m => m.TenantConfigurationPageComponent)
   },
 
-  // System Settings
+  // System Settings – account must be unlocked
   {
     path: 'system-settings',
+    canActivate: [licenseRequiredGuard],
     loadComponent: () =>
       import('./pages/system-settings/system-settings-page.component')
         .then(m => m.SystemSettingsPageComponent)

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PageStoreService } from '../../core/page-store.service';
 import { ToastService } from '../../core/toast.service';
+import { TenantContextService } from '../../core/tenant-context.service';
 
 interface LicenseProduct {
   productName: string;
@@ -24,39 +25,42 @@ interface LicenseProduct {
   styleUrls: ['./tenant-configuration-page.component.css']
 })
 export class TenantConfigurationPageComponent implements OnInit {
-  tenantName = '';
-  tenantUuid = '';
+  tenantName      = '';
+  tenantUuid      = '';
   isPlatformOwner = false;
-  /** Only a tenant SYSTEM_ADMIN may apply/generate licenses. Business users cannot. */
-  isSystemAdmin = false;
+  isSystemAdmin   = false;
 
-  licenseKey = '';
-  applying = false;
+  get isBusinessUser(): boolean { return !this.isPlatformOwner && !this.isSystemAdmin; }
+  /** Derived from actual API response, not localStorage — avoids stale flag issues. */
+  get hasActiveLicense(): boolean { return this.productsLoaded && this.products.length > 0; }
 
-  /** The tenant's licensed products (always shown). */
+  productsLoaded = false;
+
+  licenseKey      = '';
+  applying        = false;
+  showAddKeyForm  = false;
+
   products: LicenseProduct[] = [];
-
-  /** Summary of the currently-applied license (from tenant configuration) */
-  currentSummary = '';
+  currentSummary  = '';
 
   constructor(
-    private readonly store: PageStoreService,
-    private readonly toast: ToastService,
-    private readonly cdr: ChangeDetectorRef
+    private readonly store:   PageStoreService,
+    private readonly toast:   ToastService,
+    private readonly cdr:     ChangeDetectorRef,
+    private readonly ctx:     TenantContextService
   ) {}
 
   ngOnInit() {
-    this.tenantName = localStorage.getItem('opac_tenant_name') || '';
-    this.tenantUuid = localStorage.getItem('opac_tenant_uuid') || '';
-    this.isPlatformOwner = this.tenantName.trim().toLowerCase() === 'orque';
-    this.isSystemAdmin = (localStorage.getItem('opac_role') || '') === 'SYSTEM_ADMIN';
+    this.tenantName     = this.ctx.tenantName() || localStorage.getItem('opac_tenant_name') || '';
+    this.tenantUuid     = this.ctx.getTenantUuid();
+    this.isPlatformOwner = this.ctx.isPlatformOwner();
+    this.isSystemAdmin  = this.ctx.isSystemAdmin();
     if (!this.isPlatformOwner) {
       this.loadCurrentConfig();
       this.loadLicensedProducts();
     }
   }
 
-  /** Load the currently licensed products summary (chips) for this tenant. */
   private loadCurrentConfig() {
     this.store.getList('/api/tenant-configuration').subscribe({
       next: (rows) => {
@@ -68,31 +72,28 @@ export class TenantConfigurationPageComponent implements OnInit {
     });
   }
 
-  /**
-   * Always show the tenant's licensed product details (every non-Orque tenant, all roles).
-   * These are the only products the tenant holds, with quota usage.
-   */
   private loadLicensedProducts() {
-    this.store.getList('/api/license-quota').subscribe({
+    // Business users see only their own activated products (from their applied sub-license).
+    // System Admins see the master quota summary.
+    const endpoint = this.isBusinessUser ? '/api/my-products' : '/api/license-quota';
+    this.store.getList(endpoint).subscribe({
       next: (rows: any) => {
         this.products = (rows || []).map((r: any) => ({
-          productName: r.productName,
-          userLimit: r.purchased,
-          issued: r.issued,
-          remaining: r.remaining,
-          endDate: r.expiry,
-          features: r.features
+          productName:     r.productName,
+          userLimit:       r.purchased ?? r.userLimit,
+          endDate:         r.expiry,
+          features:        r.features
         }));
+        this.productsLoaded = true;
         this.cdr.markForCheck();
       },
-      error: () => { /* no products yet */ }
+      error: () => { this.productsLoaded = true; this.cdr.markForCheck(); }
     });
   }
 
-  /** Paste-key → Add License: decrypt + apply, then show the product details. */
   addLicense() {
     if (!this.licenseKey.trim()) {
-      this.toast.error('Please paste a license key.');
+      this.toast.error('Please paste your license key.');
       return;
     }
     this.applying = true;
@@ -101,22 +102,61 @@ export class TenantConfigurationPageComponent implements OnInit {
       tenantUuid: this.tenantUuid
     }).subscribe({
       next: () => {
-        this.applying = false;
-        this.licenseKey = '';
-        this.toast.success('License added successfully.');
+        this.applying      = false;
+        this.licenseKey    = '';
+        this.showAddKeyForm = false;
+        this.toast.success('Subscription activated successfully!');
+        this.ctx.markLicenseActivated();   // unlock the account immediately
         this.loadCurrentConfig();
         this.loadLicensedProducts();
         this.cdr.markForCheck();
       },
       error: (err) => {
         this.applying = false;
-        this.toast.error(err?.error?.error || 'Failed to add license. Check the key and try again.');
+        this.toast.error(err?.error?.error || 'Invalid license key. Please check and try again.');
         this.cdr.markForCheck();
       }
     });
   }
 
-  clear() {
-    this.licenseKey = '';
+  clear() { this.licenseKey = ''; }
+
+  // ── Product card helpers ───────────────────────────────────────────────────
+
+  productColor(name: string): string {
+    const n = (name || '').toUpperCase();
+    if (n.includes('ERP'))                         return '#4F46E5';
+    if (n.includes('CRM'))                         return '#7C3AED';
+    if (n.includes('IMS') || n.includes('INVEN'))  return '#0891B2';
+    if (n.includes('PARK'))                        return '#059669';
+    if (n.includes('HR'))                          return '#DC2626';
+    return '#ff8200';
+  }
+
+  productGradient(name: string): string {
+    const c = this.productColor(name);
+    return `linear-gradient(135deg, ${c}18 0%, ${c}08 100%)`;
+  }
+
+  productInitial(name: string): string {
+    return (name || '?').replace(/[^A-Za-z]/g, '').slice(0, 3).toUpperCase() || '?';
+  }
+
+  formatDate(d: string | undefined): string {
+    if (!d) return '—';
+    try {
+      return new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    } catch {
+      return d;
+    }
+  }
+
+  /** Show at most 5 features in the card; rest are counted. */
+  visibleFeatures(features: string[] | undefined): string[] {
+    return (features || []).slice(0, 5);
+  }
+
+  extraFeatureCount(features: string[] | undefined): number {
+    return Math.max(0, (features || []).length - 5);
   }
 }
