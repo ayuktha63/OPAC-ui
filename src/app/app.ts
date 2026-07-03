@@ -64,14 +64,23 @@ export class App implements OnInit {
     const user = JSON.parse(localStorage.getItem('opac_user') || '{}');
     if (!user.username) { this.toastSvc.error('Session expired. Please log in again.'); return; }
     this.crmLaunching = true;
+    // Open the window synchronously (on the user-gesture stack) to avoid popup blockers.
+    // We'll navigate it once the SSO token arrives.
+    const crmWindow = globalThis.open('', '_blank');
     this.authSvc.getSsoToken(user.username, user.tenantUuid || '').subscribe({
       next: (res) => {
         this.crmLaunching = false;
-        window.open(`${this.crmAppUrl}/sso?token=${encodeURIComponent(res.token)}`, '_blank');
+        const url = `${this.crmAppUrl}/sso?token=${encodeURIComponent(res.token)}`;
+        if (crmWindow) {
+          crmWindow.location.href = url;
+        } else {
+          globalThis.location.href = url;
+        }
         this.cdr.markForCheck();
       },
       error: () => {
         this.crmLaunching = false;
+        if (crmWindow) crmWindow.close();
         this.toastSvc.error('Failed to launch CRM. Please try again.');
         this.cdr.markForCheck();
       }
@@ -131,7 +140,21 @@ export class App implements OnInit {
         company_name: localStorage.getItem('opac_tenant_name') || ''
       };
       this.isLoggedIn = true;
+      this.refreshCrmLicenseFlag();
     }
+  }
+
+  /** Refresh the CRM license flag from the backend so the app switcher reflects
+   *  the latest license state without requiring a re-login. */
+  private refreshCrmLicenseFlag(): void {
+    this.store.getList('/api/my-crm-license').subscribe({
+      next: (res: any) => {
+        const hasLicense = !!(res?.hasCrmLicense ?? (res as any[])?.[0]?.hasCrmLicense);
+        localStorage.setItem('opac_has_crm_license', String(hasLicense));
+        this.cdr.markForCheck();
+      },
+      error: () => { /* keep existing value on network error */ }
+    });
   }
 
   /** Tenant name shown in the topbar badge. Reads directly from localStorage so it's

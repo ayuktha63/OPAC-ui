@@ -199,11 +199,10 @@
         {
           "name": "requestedBy",
           "label": "Requested By",
-          "type": "select",
-          "placeholder": "Select Requester",
-          "required": true,
-          "colSpan": "col-1",
-          "options": []
+          "type": "input",
+          "inputType": "text",
+          "isDisabled": true,
+          "colSpan": "col-1"
         }
       ]
     },

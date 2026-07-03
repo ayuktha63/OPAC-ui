@@ -43,6 +43,19 @@ export class LicensePageComponent implements OnInit {
     this.isTenantAdmin   = !this.ctx.isPlatformOwner() && role === 'SYSTEM_ADMIN';
     this.hasActiveLicense = this.ctx.hasActiveLicense();
     if (this.isTenantAdmin && this.hasActiveLicense) this.loadQuota();
+    this.refreshCrmLicenseFlag();
+  }
+
+  /** Refresh the CRM license flag so the app switcher reflects the latest state. */
+  private refreshCrmLicenseFlag(): void {
+    this.store.getList('/api/my-crm-license').subscribe({
+      next: (res: any) => {
+        const hasLicense = !!(res?.hasCrmLicense ?? (res as any[])?.[0]?.hasCrmLicense);
+        localStorage.setItem('opac_has_crm_license', String(hasLicense));
+        this.cdr.markForCheck();
+      },
+      error: () => {}
+    });
   }
 
   loadQuota() {
