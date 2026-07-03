@@ -3,38 +3,91 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterOutlet } from '@angular/router';
-import { ContextSwitcherComponent, OToastComponent } from 'orque-ui';
+import { ContextSwitcherComponent, OToastComponent, OAppSwitcherComponent, AppItem } from 'orque-ui';
 import { SystemSettingsService } from './core/system-settings.service';
 import { TenantContextService } from './core/tenant-context.service';
 import { AuthService } from './core/auth.service';
 import { ToastService } from './core/toast.service';
 import { PageStoreService } from './core/page-store.service';
+import { AppConfigService } from './core/app-config.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterOutlet, ContextSwitcherComponent, OToastComponent],
+  imports: [CommonModule, FormsModule, RouterOutlet, ContextSwitcherComponent, OToastComponent, OAppSwitcherComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
 export class App implements OnInit {
-  private readonly backendUrl = 'http://localhost:8082';
+  private get backendUrl(): string { return this.cfgSvc.opacApiUrl; }
+  private get crmAppUrl(): string  { return this.cfgSvc.crmAppUrl; }
 
   // ── Login State ─────────────────────────────────────────
-  isLoggedIn  = false;
+  isLoggedIn  = !!localStorage.getItem('opac_user');
   isLoading   = false;
-  loginMode: 'business' | 'system' = 'business';
+  loginMode: 'business' | 'system' = (localStorage.getItem('opac_login_mode') as 'business' | 'system') || 'business';
   companyName = '';
   username    = '';
   password    = '';
-  userRole    = 'REQUESTER';
+  userRole    = localStorage.getItem('opac_role') || 'REQUESTER';
 
 
   // ── Shell Navigation ─────────────────────────────────────
   currentContext = 'OPAC';
 
+  // ── App Switcher ──────────────────────────────────────────
+  crmLaunching = false;
+  showNoLicensePopup = false;
+
+  get hasCrmLicense(): boolean {
+    return localStorage.getItem('opac_has_crm_license') === 'true';
+  }
+
+  get appSwitcherApps(): AppItem[] {
+    if (!this.isLoggedIn || this.isPlatformOwner) return [];
+    return [{
+      key: 'crm',
+      label: 'CRM',
+      desc: 'Customer Management',
+      iconPath: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M23 21v-2a4 4 0 0 1-3-3.87M16 3.13a4 4 0 0 1 0 7.75M9 7a4 4 0 1 0 0 8 4 4 0 0 0 0-8z',
+      color: this.hasCrmLicense ? '#7c3aed' : '#9ca3af',
+      loading: this.crmLaunching,
+      action: () => this.launchCrm()
+    }];
+  }
+
+  launchCrm() {
+    if (!this.hasCrmLicense) {
+      this.showNoLicensePopup = true;
+      return;
+    }
+    const user = JSON.parse(localStorage.getItem('opac_user') || '{}');
+    if (!user.username) { this.toastSvc.error('Session expired. Please log in again.'); return; }
+    this.crmLaunching = true;
+    this.authSvc.getSsoToken(user.username, user.tenantUuid || '').subscribe({
+      next: (res) => {
+        this.crmLaunching = false;
+        window.open(`${this.crmAppUrl}/sso?token=${encodeURIComponent(res.token)}`, '_blank');
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.crmLaunching = false;
+        this.toastSvc.error('Failed to launch CRM. Please try again.');
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  closeNoLicensePopup() {
+    this.showNoLicensePopup = false;
+  }
+
   // ── Active Tenant Context ────────────────────────────────
-  activeTenant: any  = null;
+  activeTenant: any = (() => {
+    const uuid = localStorage.getItem('opac_tenant_uuid');
+    const name = localStorage.getItem('opac_tenant_name');
+    return uuid ? { uuid, tenant_name: name, company_name: name } : null;
+  })();
   activeTenantsList: any[] = [];
 
   // ── Topbar Dropdowns ────────────────────────────────────
@@ -59,11 +112,32 @@ export class App implements OnInit {
     private readonly tenantContextSvc: TenantContextService,
     private readonly authSvc: AuthService,
     private readonly toastSvc: ToastService,
-    private readonly pageStore: PageStoreService
+    private readonly pageStore: PageStoreService,
+    private readonly cfgSvc: AppConfigService
   ) {}
 
   ngOnInit() {
     this.loadActiveTenants();
+    this.restoreSession();
+  }
+
+  private restoreSession(): void {
+    if (this.authSvc.isLoggedIn()) {
+      const user = this.authSvc.getCurrentUser();
+      this.userRole = user?.role || 'REQUESTER';
+      this.activeTenant = {
+        uuid: localStorage.getItem('opac_tenant_uuid') || '',
+        tenant_name: localStorage.getItem('opac_tenant_name') || '',
+        company_name: localStorage.getItem('opac_tenant_name') || ''
+      };
+      this.isLoggedIn = true;
+    }
+  }
+
+  /** Tenant name shown in the topbar badge. Reads directly from localStorage so it's
+   *  always current without requiring a re-login or change-detection cycle. */
+  get currentTenantName(): string {
+    return localStorage.getItem('opac_tenant_name') || this.activeTenant?.tenant_name || '';
   }
 
   get isPlatformOwner(): boolean {
@@ -269,8 +343,9 @@ export class App implements OnInit {
   // ── Session Logging ───────────────────────────────────────
   private logSession() {
     const userAgent = navigator.userAgent;
-    const browser = userAgent.includes('Chrome') ? 'Chrome'
-      : userAgent.includes('Firefox') ? 'Firefox' : 'Safari';
+    let browser = 'Safari';
+    if (userAgent.includes('Chrome')) browser = 'Chrome';
+    else if (userAgent.includes('Firefox')) browser = 'Firefox';
     this.http.post(`${this.backendUrl}/api/sessions/create`, {
       tenantUuid: this.activeTenant?.uuid || null,
       username: this.username,

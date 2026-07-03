@@ -1,5 +1,117 @@
 :host { display: block; height: 100%; }
 
+/* ── Full-screen "License Not Applied" card ──────────────────────────────── */
+.pending-wrap {
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8fafc;
+  padding: 24px;
+}
+.pending-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 48px 40px;
+  max-width: 560px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 4px 24px rgba(0,0,0,.06);
+}
+.icon-wrap {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #fef3c7;
+  color: #92400e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+}
+.pending-card h1 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 12px;
+  color: #111827;
+}
+.desc {
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0 0 32px;
+}
+.steps {
+  text-align: left;
+  border-top: 1px solid #f3f4f6;
+  padding-top: 24px;
+  margin-bottom: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.step {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+.step-num {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  border-radius: 50%;
+  background: #6366f1;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  margin-top: 2px;
+}
+.step strong {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  display: block;
+  margin-bottom: 4px;
+}
+.step p {
+  font-size: 13px;
+  color: #4b5563;
+  margin: 0;
+  line-height: 1.5;
+}
+.actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+.btn-retry {
+  background: #6366f1;
+  color: #fff;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.btn-retry:hover:not(:disabled) { background: #4f46e5; }
+.btn-retry:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-logout {
+  background: #fff;
+  color: #111827;
+  border: 1px solid #d1d5db;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.btn-logout:hover { background: #f9fafb; }
+
 /* ── Quota banner ────────────────────────────────────────────────────────── */
 .lic-quota-bar {
   display: flex;

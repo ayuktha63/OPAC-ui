@@ -25,7 +25,7 @@ export const routes: Routes = [
   },
   {
     path: 'license/:tab',
-    canActivate: [licenseRequiredGuard, adminOrOwnerGuard],
+    canActivate: [adminOrOwnerGuard],
     loadComponent: () =>
       import('./pages/license/license-page.component').then(m => m.LicensePageComponent)
   },

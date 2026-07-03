@@ -49,6 +49,9 @@ export class ListPageComponent implements OnInit, OnChanges, OnDestroy {
   /** Role read from localStorage */
   userRole: UserRole = 'SYSTEM_ADMIN';
 
+  /** Products allowed by the tenant's master license — limits the license-form product picker. */
+  allowedProducts: string[] = [];
+
   // Legacy error toast (kept for backward compat)
   toastError: string | null = null;
   private _toastTimer: any = null;
@@ -96,6 +99,26 @@ export class ListPageComponent implements OnInit, OnChanges, OnDestroy {
       console.log(`🚀 Calling loadPage() from ngOnInit`);
       this._loadedResource = this.resource;
       this.loadPage();
+    }
+
+    // For the license resource: non-Orque system admins load master products so the
+    // form restricts product/feature selection to only what the master license allows.
+    if (this.resource === 'license') {
+      const tenantName = (localStorage.getItem('opac_tenant_name') || '').trim().toLowerCase();
+      const isTenantAdmin = !!tenantName && tenantName !== 'orque'
+                            && localStorage.getItem('opac_role') === 'SYSTEM_ADMIN';
+      if (isTenantAdmin) {
+        this.store.getList('/api/master-license-products').subscribe({
+          next: (products: any[]) => {
+            this.allowedProducts = (products || []).map((p: any) => (p.productName || '').toUpperCase());
+            if (this.pageRendererRef) {
+              (this.pageRendererRef as any).allowedProducts = this.allowedProducts;
+            }
+            this.cdr.markForCheck();
+          },
+          error: () => { /* keep empty — backend still enforces at save time */ }
+        });
+      }
     }
   }
 

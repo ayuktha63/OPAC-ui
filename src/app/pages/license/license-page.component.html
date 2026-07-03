@@ -1,5 +1,13 @@
-<!-- Quota banner — visible to non-ORQUE System Admins only -->
-@if (isTenantAdmin && quotas.length) {
+<!-- Activation screen — shown to System Admin until a license is active -->
+@if (isTenantAdmin && !hasActiveLicense) {
+  <app-tenant-configuration-page></app-tenant-configuration-page>
+}
+
+<!-- Normal license list — shown when license is active -->
+@if (!isTenantAdmin || hasActiveLicense) {
+
+<!-- Quota banner — visible to non-ORQUE System Admins with active license -->
+@if (isTenantAdmin && hasActiveLicense && quotas.length) {
   <div class="lic-quota-bar">
     <span class="lic-quota-label">License quota:</span>
     @for (q of quotas; track q.productName) {
@@ -21,3 +29,4 @@
 
 <!-- Approval workflow — same for ORQUE and non-ORQUE System Admins -->
 <app-list-page [resource]="'license'" [initialTab]="activeTab"></app-list-page>
+}

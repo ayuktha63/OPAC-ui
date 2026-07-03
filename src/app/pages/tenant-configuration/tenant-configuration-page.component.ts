@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { PageStoreService } from '../../core/page-store.service';
 import { ToastService } from '../../core/toast.service';
 import { TenantContextService } from '../../core/tenant-context.service';
+import { AuthService } from '../../core/auth.service';
+import { AppConfigService } from '../../core/app-config.service';
 
 interface LicenseProduct {
   productName: string;
@@ -39,6 +41,7 @@ export class TenantConfigurationPageComponent implements OnInit {
   licenseKey      = '';
   applying        = false;
   showAddKeyForm  = false;
+  launchingCrm    = false;
 
   products: LicenseProduct[] = [];
   currentSummary  = '';
@@ -47,7 +50,9 @@ export class TenantConfigurationPageComponent implements OnInit {
     private readonly store:   PageStoreService,
     private readonly toast:   ToastService,
     private readonly cdr:     ChangeDetectorRef,
-    private readonly ctx:     TenantContextService
+    private readonly ctx:     TenantContextService,
+    private readonly auth:    AuthService,
+    private readonly cfg:     AppConfigService
   ) {}
 
   ngOnInit() {
@@ -101,12 +106,27 @@ export class TenantConfigurationPageComponent implements OnInit {
       licenseKey: this.licenseKey.trim(),
       tenantUuid: this.tenantUuid
     }).subscribe({
-      next: () => {
+      next: (resp: any) => {
         this.applying      = false;
         this.licenseKey    = '';
         this.showAddKeyForm = false;
         this.toast.success('Subscription activated successfully!');
         this.ctx.markLicenseActivated();   // unlock the account immediately
+
+        // Cache the activated features as accesspolicy so the next CRM SSO picks them up.
+        const products: any[] = resp?.payload?.products ?? [];
+        const features: string[] = [];
+        for (const p of products) {
+          for (const f of (p.features ?? [])) {
+            if (typeof f !== 'string') continue;
+          const route = f.startsWith('/crm/') ? f.replace('/crm/', '/') : f;
+            if (!features.includes(route)) features.push(route);
+          }
+        }
+        if (features.length > 0) {
+          localStorage.setItem('accesspolicy', JSON.stringify(features));
+        }
+
         this.loadCurrentConfig();
         this.loadLicensedProducts();
         this.cdr.markForCheck();
@@ -120,6 +140,27 @@ export class TenantConfigurationPageComponent implements OnInit {
   }
 
   clear() { this.licenseKey = ''; }
+
+  launchCrm() {
+    const user = JSON.parse(localStorage.getItem('opac_user') || '{}');
+    const username  = user.username  || '';
+    const tenantUuid = user.tenantUuid || this.tenantUuid;
+    if (!username) {
+      this.toast.error('Session expired. Please log in again.');
+      return;
+    }
+    this.launchingCrm = true;
+    this.auth.getSsoToken(username, tenantUuid).subscribe({
+      next: (res) => {
+        this.launchingCrm = false;
+        window.open(`${this.cfg.crmAppUrl}/sso?token=${encodeURIComponent(res.token)}`, '_blank');
+      },
+      error: () => {
+        this.launchingCrm = false;
+        this.toast.error('Failed to generate SSO token. Please try again.');
+      }
+    });
+  }
 
   // ── Product card helpers ───────────────────────────────────────────────────
 

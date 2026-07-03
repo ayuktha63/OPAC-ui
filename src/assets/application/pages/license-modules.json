@@ -76,60 +76,43 @@
       "icon": "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M23 21v-2a4 4 0 0 1-3-3.87M16 3.13a4 4 0 0 1 0 7.75M9 7a4 4 0 1 0 0 8 4 4 0 0 0 0-8z",
       "groups": {
         "Sales": [
-          "/crm/leads",
-          "/crm/opportunities",
-          "/crm/quotes",
-          "/crm/sales-orders",
-          "/crm/pipeline",
-          "/crm/sales-forecast",
-          "/crm/deal-slip"
+          "/leads",
+          "/deals",
+          "/quotes",
+          "/invoices",
+          "/products"
         ],
-        "Contacts": [
-          "/crm/contacts",
-          "/crm/accounts",
-          "/crm/customer-master",
-          "/crm/contact-groups",
-          "/crm/interaction-history"
+        "Contacts & Accounts": [
+          "/contacts",
+          "/accounts",
+          "/activities"
         ],
         "Marketing": [
-          "/crm/campaigns",
-          "/crm/email-marketing",
-          "/crm/lead-scoring",
-          "/crm/market-segments",
-          "/crm/campaign-analytics"
+          "/campaigns",
+          "/emails"
         ],
-        "Customer Service": [
-          "/crm/tickets",
-          "/crm/support-cases",
-          "/crm/sla-management",
-          "/crm/knowledge-base",
-          "/crm/feedback"
+        "Work": [
+          "/tasks",
+          "/calendar"
         ],
-        "Reports": [
-          "/crm/sales-performance",
-          "/crm/lead-conversion",
-          "/crm/customer-analytics",
-          "/crm/revenue-forecast",
-          "/crm/campaign-report"
+        "Commerce": [
+          "/inventory"
+        ],
+        "Analytics": [
+          "/reports",
+          "/analytics",
+          "/report-builder"
         ]
       },
       "systemSettings": [
-        "/settings/company-profile",
-        "/settings/currency",
-        "/settings/approval-workflow",
-        "/settings/email-notifications",
-        "/settings/user-roles",
-        "/settings/access-policy",
-        "/settings/audit-log"
+        "/settings",
+        "/users",
+        "/active-sessions",
+        "/dashboard-builder",
+        "/customization"
       ],
       "businessMaster": [
-        "/masters/customer-category",
-        "/masters/sales-territory",
-        "/masters/product-catalog",
-        "/masters/price-list",
-        "/masters/payment-terms",
-        "/masters/industry-type",
-        "/masters/lead-source"
+        "/dashboard"
       ]
     },
     "ims": {

@@ -3,17 +3,19 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { TenantContextService } from './tenant-context.service';
+import { AppConfigService } from './app-config.service';
 
 @Injectable({ providedIn: 'root' })
 export class PageStoreService {
-  private readonly backendUrl = 'http://localhost:8082';
+  private get backendUrl(): string { return this.cfg.opacApiUrl; }
 
   /** In-memory config cache — avoids repeated asset fetches on tab switches */
   private readonly configCache = new Map<string, any>();
 
   constructor(
     private readonly http: HttpClient,
-    private readonly tenantContextSvc: TenantContextService
+    private readonly tenantContextSvc: TenantContextService,
+    private readonly cfg: AppConfigService
   ) {}
 
   /**

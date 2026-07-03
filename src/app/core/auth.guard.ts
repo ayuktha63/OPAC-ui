@@ -33,20 +33,27 @@ export const adminOrOwnerGuard: CanActivateFn = () => {
 };
 
 /**
- * Blocks business users from accessing any screen until the tenant has an active
- * license applied. ORQUE and System Admins are always allowed through — System Admins
- * need access to License and System Settings regardless of license state.
+ * Blocks ALL non-platform-owner users from accessing protected screens until the
+ * tenant has an active license applied. System Admins without a license may only
+ * access the /license page; business users go to /tenant-configuration.
  */
 export const licenseRequiredGuard: CanActivateFn = () => {
   const ctx    = inject(TenantContextService);
   const router = inject(Router);
 
-  // Platform owner and System Admins are never locked out
-  if (ctx.isPlatformOwner() || ctx.isSystemAdmin()) return true;
+  // Platform owner is never locked out
+  if (ctx.isPlatformOwner()) return true;
 
-  // Business users need an active license before accessing anything else
+  // Anyone with an active license passes
   if (ctx.hasActiveLicense()) return true;
 
+  // System Admin without a license → send to license page to apply one
+  if (ctx.isSystemAdmin()) {
+    router.navigate(['/license']);
+    return false;
+  }
+
+  // Business users without a license → my configuration page
   router.navigate(['/tenant-configuration']);
   return false;
 };

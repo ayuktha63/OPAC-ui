@@ -37,7 +37,14 @@
     { "name": "companyRegistrationNumber",  "label": "Company Registration Number",    "isHeaderView": true, "columnView": true },
     { "name": "status",                    "label": "Status",                         "isHeaderView": true, "columnView": true, "pipe": "status" }
   ],
-  "contextMenuActions": [],
+  "contextMenuActions": [
+    { "label": "Send for Approval",  "action": "submit",  "showWhen": ["Draft", "Returned"] },
+    { "label": "View",               "action": "view",    "showWhen": ["Draft", "Returned", "In Progress", "Active", "Inactive", "Rejected"] },
+    { "label": "Approve",            "action": "approve", "showWhen": ["In Progress"] },
+    { "label": "Reject",             "action": "reject",  "showWhen": ["In Progress"] },
+    { "label": "Return for Revision","action": "return",  "showWhen": ["In Progress"] },
+    { "label": "Share",              "action": "share",   "showWhen": ["In Progress", "Active"] }
+  ],
   "tableTool": {
     "add": true,
     "edit": true,
