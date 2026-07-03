@@ -9,24 +9,21 @@ export interface AppConfig {
 
 @Injectable({ providedIn: 'root' })
 export class AppConfigService {
-  private config: AppConfig = {
-    opacApiUrl: 'http://localhost:8082',
-    crmAppUrl: 'http://localhost:4300'
-  };
+  private config: AppConfig | null = null;
 
   constructor(private http: HttpClient) {}
 
   async load(): Promise<void> {
-    try {
-      const loaded = await firstValueFrom(
-        this.http.get<AppConfig>('/assets/config.json')
-      );
-      this.config = { ...this.config, ...loaded };
-    } catch {
-      // falls back to defaults above
-    }
+    this.config = await firstValueFrom(
+      this.http.get<AppConfig>('/assets/config.json')
+    );
   }
 
-  get opacApiUrl(): string { return this.config.opacApiUrl; }
-  get crmAppUrl(): string  { return this.config.crmAppUrl; }
+  private get<K extends keyof AppConfig>(key: K): AppConfig[K] {
+    if (!this.config) throw new Error(`AppConfig not loaded — missing /assets/config.json`);
+    return this.config[key];
+  }
+
+  get opacApiUrl(): string { return this.get('opacApiUrl'); }
+  get crmAppUrl():  string { return this.get('crmAppUrl'); }
 }
