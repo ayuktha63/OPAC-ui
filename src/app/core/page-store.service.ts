@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { shareReplay, tap } from 'rxjs/operators';
 import { TenantContextService } from './tenant-context.service';
 import { AppConfigService } from './app-config.service';
 
@@ -11,6 +11,10 @@ export class PageStoreService {
 
   /** In-memory config cache — avoids repeated asset fetches on tab switches */
   private readonly configCache = new Map<string, any>();
+
+  /** Cached /api/active-tenants response — same list is re-fetched on every page
+   *  that has a tenant picker field; the list rarely changes within a session. */
+  private activeTenants$: Observable<any[]> | null = null;
 
   constructor(
     private readonly http: HttpClient,
@@ -42,6 +46,15 @@ export class PageStoreService {
   /** Fetch all records for a given API path */
   getList(apiPath: string): Observable<any[]> {
     return this.http.get<any[]>(`${this.backendUrl}${apiPath}`, { headers: this.buildHeaders() });
+  }
+
+  /** Cached variant of getList('/api/active-tenants') — the tenant picker list is
+   *  identical across every page load in a session, so fetch it once and replay it. */
+  getActiveTenantsCached(): Observable<any[]> {
+    if (!this.activeTenants$) {
+      this.activeTenants$ = this.getList('/api/active-tenants').pipe(shareReplay(1));
+    }
+    return this.activeTenants$;
   }
 
   /** POST — create new record or trigger a workflow action */
@@ -77,5 +90,6 @@ export class PageStoreService {
    */
   clearConfigCache(): void {
     this.configCache.clear();
+    this.activeTenants$ = null;
   }
 }

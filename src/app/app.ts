@@ -147,7 +147,7 @@ export class App implements OnInit {
   /** Refresh the CRM license flag from the backend so the app switcher reflects
    *  the latest license state without requiring a re-login. */
   private refreshCrmLicenseFlag(): void {
-    this.store.getList('/api/my-crm-license').subscribe({
+    this.pageStore.getList('/api/my-crm-license').subscribe({
       next: (res: any) => {
         const hasLicense = !!(res?.hasCrmLicense ?? (res as any[])?.[0]?.hasCrmLicense);
         localStorage.setItem('opac_has_crm_license', String(hasLicense));

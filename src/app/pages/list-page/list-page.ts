@@ -11,7 +11,8 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import {
   PageRendererComponent,
   PageAction,
@@ -59,6 +60,9 @@ export class ListPageComponent implements OnInit, OnChanges, OnDestroy {
   private _routeSub?: Subscription;
   /** Resource that has been loaded — used to reload when the @Input resource changes */
   private _loadedResource: string | null = null;
+
+  /** Unsubscribes all HTTP-triggered subscriptions when the component is destroyed. */
+  private readonly destroy$ = new Subject<void>();
 
   constructor(
     private readonly store: PageStoreService,
@@ -108,7 +112,7 @@ export class ListPageComponent implements OnInit, OnChanges, OnDestroy {
       const isTenantAdmin = !!tenantName && tenantName !== 'orque'
                             && localStorage.getItem('opac_role') === 'SYSTEM_ADMIN';
       if (isTenantAdmin) {
-        this.store.getList('/api/master-license-products').subscribe({
+        this.store.getList('/api/master-license-products').pipe(takeUntil(this.destroy$)).subscribe({
           next: (products: any[]) => {
             this.allowedProducts = (products || []).map((p: any) => (p.productName || '').toUpperCase());
             if (this.pageRendererRef) {
@@ -136,6 +140,8 @@ export class ListPageComponent implements OnInit, OnChanges, OnDestroy {
   ngOnDestroy() {
     this._routeSub?.unsubscribe();
     if (this._toastTimer) clearTimeout(this._toastTimer);
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   // ── Page Load ──────────────────────────────────────────────────────────────
@@ -148,7 +154,7 @@ export class ListPageComponent implements OnInit, OnChanges, OnDestroy {
     this.data = [];
     this.cdr.markForCheck();
 
-    this.store.getPageConfig(this.resource).subscribe({
+    this.store.getPageConfig(this.resource).pipe(takeUntil(this.destroy$)).subscribe({
       next: (config: PageConfig) => {
         console.log(`✅ Page config loaded, now fetching data from: ${config.api}`);
         this.page = config;
@@ -170,7 +176,7 @@ export class ListPageComponent implements OnInit, OnChanges, OnDestroy {
     this.loading = true;
     this.cdr.markForCheck();
 
-    this.store.getList(api).subscribe({
+    this.store.getList(api).pipe(takeUntil(this.destroy$)).subscribe({
       next: (rows) => {
         console.log(`✅ Data loaded! Rows: ${rows?.length || 0}`);
         this.data = rows ?? [];
@@ -204,7 +210,7 @@ export class ListPageComponent implements OnInit, OnChanges, OnDestroy {
     const tenantName = (localStorage.getItem('opac_tenant_name') || '').trim();
     const isTenantScoped = !!tenantName && tenantName.toLowerCase() !== 'orque';
 
-    this.store.getList('/api/active-tenants').subscribe({
+    this.store.getActiveTenantsCached().pipe(takeUntil(this.destroy$)).subscribe({
       next: (tenants) => {
         const options = (tenants || []).map((tenant: any) => ({
           label: tenant.label || tenant.tenantName || tenant.value,
@@ -383,8 +389,8 @@ export class ListPageComponent implements OnInit, OnChanges, OnDestroy {
     this.toastError = message;
     this._toastTimer = setTimeout(() => {
       this.toastError = null;
-      this.cdr.detectChanges();
+      this.cdr.markForCheck();
     }, 6000);
-    this.cdr.detectChanges();
+    this.cdr.markForCheck();
   }
 }
