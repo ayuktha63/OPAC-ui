@@ -366,15 +366,28 @@ export class App implements OnInit {
   // ── Session Logging ───────────────────────────────────────
   private logSession() {
     const userAgent = navigator.userAgent;
-    let browser = 'Safari';
-    if (userAgent.includes('Chrome')) browser = 'Chrome';
+    let browser = 'Other';
+    if (userAgent.includes('Edg/')) browser = 'Edge';
+    else if (userAgent.includes('Chrome')) browser = 'Chrome';
     else if (userAgent.includes('Firefox')) browser = 'Firefox';
+    else if (userAgent.includes('Safari')) browser = 'Safari';
+
+    let device = 'Desktop';
+    if (/iPad/.test(userAgent)) device = 'iPad';
+    else if (/iPhone/.test(userAgent)) device = 'iPhone';
+    else if (/Android/.test(userAgent)) device = /Mobile/.test(userAgent) ? 'Android Phone' : 'Android Tablet';
+    else if (/Macintosh/.test(userAgent)) device = 'Mac';
+    else if (/Windows/.test(userAgent)) device = 'Windows PC';
+    else if (/Linux/.test(userAgent)) device = 'Linux PC';
+
+    // ipAddress is intentionally omitted — the backend derives the real client IP
+    // from X-Forwarded-For server-side; a client-supplied IP can't be trusted for
+    // an audit/security record.
     this.http.post(`${this.backendUrl}/api/sessions/create`, {
       tenantUuid: this.activeTenant?.uuid || null,
       username: this.username,
-      device: 'MacBook Pro',
-      browser,
-      ipAddress: '127.0.0.1'
+      device,
+      browser
     }).subscribe({ error: (e) => console.error('Session log failed:', e) });
   }
 }
