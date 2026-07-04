@@ -224,12 +224,8 @@
           </div>
         }
       </div>
+      <!-- Right-to-left order: App Switcher, User, Settings, Context Switcher -->
       <div class="topbar-right">
-        <!-- App Switcher (CRM and other licensed products) -->
-        @if (appSwitcherApps.length > 0) {
-          <o-app-switcher [apps]="appSwitcherApps"></o-app-switcher>
-        }
-
         <o-context-switcher
           [currentContext]="currentContext"
           [activeTenant]="activeTenant"
@@ -296,6 +292,10 @@
           }
         </div>
 
+        <!-- App Switcher (CRM and other licensed products) — right extreme -->
+        @if (appSwitcherApps.length > 0) {
+          <o-app-switcher [apps]="appSwitcherApps"></o-app-switcher>
+        }
       </div>
     </header>
 
