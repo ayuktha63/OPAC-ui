@@ -100,7 +100,6 @@
         ],
         "Analytics": [
           "/reports",
-          "/analytics",
           "/report-builder"
         ]
       },
