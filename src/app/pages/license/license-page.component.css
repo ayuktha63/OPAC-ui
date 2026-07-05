@@ -61,7 +61,7 @@
   height: 28px;
   min-width: 28px;
   border-radius: 50%;
-  background: #6366f1;
+  background: #0F3460;
   color: #fff;
   display: flex;
   align-items: center;
@@ -89,7 +89,7 @@
   justify-content: center;
 }
 .btn-retry {
-  background: #6366f1;
+  background: #0F3460;
   color: #fff;
   border: none;
   padding: 10px 24px;
@@ -98,7 +98,7 @@
   font-weight: 500;
   cursor: pointer;
 }
-.btn-retry:hover:not(:disabled) { background: #4f46e5; }
+.btn-retry:hover:not(:disabled) { background: #163E7A; }
 .btn-retry:disabled { opacity: 0.6; cursor: not-allowed; }
 .btn-logout {
   background: #fff;

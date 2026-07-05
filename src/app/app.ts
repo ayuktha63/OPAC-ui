@@ -50,7 +50,7 @@ export class App implements OnInit {
       label: 'CRM',
       desc: 'Customer Management',
       iconPath: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M23 21v-2a4 4 0 0 1-3-3.87M16 3.13a4 4 0 0 1 0 7.75M9 7a4 4 0 1 0 0 8 4 4 0 0 0 0-8z',
-      color: this.hasCrmLicense ? '#7c3aed' : '#9ca3af',
+      color: this.hasCrmLicense ? '#0F3460' : '#9ca3af',
       loading: this.crmLaunching,
       action: () => this.launchCrm()
     }];

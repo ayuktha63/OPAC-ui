@@ -949,7 +949,7 @@
   border-radius: 20px;
   background: #eef2ff;
   border: 1px solid #c7d2fe;
-  color: #4f46e5;
+  color: #0F3460;
   font-size: 0.7rem;
   font-weight: 700;
   white-space: nowrap;
@@ -1196,9 +1196,9 @@ dialog.no-license-modal p {
 }
 .no-license-actions { display: flex; justify-content: center; }
 .btn-close-popup {
-  background: #6366f1; color: #fff;
+  background: #0F3460; color: #fff;
   border: none; padding: 10px 28px;
   border-radius: 8px; font-size: 14px;
   font-weight: 500; cursor: pointer;
 }
-.btn-close-popup:hover { background: #4f46e5; }
+.btn-close-popup:hover { background: #0F3460; }
