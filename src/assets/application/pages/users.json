@@ -4,6 +4,17 @@
   "store": "users",
   "api": "/api/users",
   "tableUniqueFieldName": "userId",
+  "toggleButton": {
+    "elements": [
+      { "label": "All",      "value": "All", "isDefault": true },
+      { "label": "Active",   "value": "Active" },
+      { "label": "Inactive", "value": "Inactive" }
+    ],
+    "statusMap": {
+      "Active":   ["ACTIVE"],
+      "Inactive": ["INACTIVE"]
+    }
+  },
   "tableList": [
     {
       "name": "userId",
