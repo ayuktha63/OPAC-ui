@@ -134,6 +134,7 @@ export class App implements OnInit {
     if (this.authSvc.isLoggedIn()) {
       const user = this.authSvc.getCurrentUser();
       this.userRole = user?.role || 'REQUESTER';
+      this.username = user?.username || '';
       this.activeTenant = {
         uuid: localStorage.getItem('opac_tenant_uuid') || '',
         tenant_name: localStorage.getItem('opac_tenant_name') || '',
