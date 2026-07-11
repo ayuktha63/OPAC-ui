@@ -148,11 +148,20 @@ export class App implements OnInit {
     this.loadActiveTenants();
     this.restoreSession();
     this.evaluateLicenseExpiredPopup();
+    this.syncRouteFlags(this.router.url);
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         this.evaluateLicenseExpiredPopup();
+        // Navigation resolves outside this component's own event handlers, so the
+        // template gate on isPasswordResetRoute won't repaint without an explicit tick.
+        this.syncRouteFlags(event.urlAfterRedirects);
+        this.cdr.detectChanges();
       }
     });
+  }
+
+  private syncRouteFlags(url: string): void {
+    this.isPasswordResetRoute = url.startsWith('/forgot-password') || url.startsWith('/reset-password');
   }
 
   private restoreSession(): void {
@@ -188,6 +197,15 @@ export class App implements OnInit {
   get currentTenantName(): string {
     return localStorage.getItem('opac_tenant_name') || this.activeTenant?.tenant_name || '';
   }
+
+  goToForgotPassword(): void {
+    this.router.navigate(['/forgot-password']);
+  }
+
+  /** These two screens must render even when logged out, bypassing the login-form shell entirely.
+   *  Kept as a plain field (updated in syncRouteFlags on NavigationEnd) so the template
+   *  gate repaints deterministically with the explicit detectChanges() tick. */
+  isPasswordResetRoute = false;
 
   get isPlatformOwner(): boolean {
     return this.tenantContextSvc.isPlatformOwner();

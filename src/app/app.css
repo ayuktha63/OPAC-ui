@@ -100,6 +100,16 @@
   width: 100%;
 }
 
+.login-error {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  color: #dc2626;
+  font-size: 13px;
+}
+
 .login-forgot-password {
   color: #2563eb;
   cursor: pointer;

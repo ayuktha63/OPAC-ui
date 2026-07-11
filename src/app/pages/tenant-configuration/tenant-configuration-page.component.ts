@@ -11,12 +11,16 @@ interface LicenseProduct {
   productName: string;
   startDate?: string;
   endDate?: string;
+  activatedOn?: string;
+  graceUntil?: string;
   userLimit?: number;
   issued?: number;
   remaining?: number;
   concurrentLimit?: number;
   gracePeriod?: number;
   features?: string[];
+  source?: string;
+  status?: 'Active' | 'Grace' | 'Expired';
 }
 
 @Component({
@@ -85,15 +89,42 @@ export class TenantConfigurationPageComponent implements OnInit {
       next: (rows: any) => {
         this.products = (rows || []).map((r: any) => ({
           productName:     r.productName,
-          userLimit:       r.purchased ?? r.userLimit,
+          userLimit:       r.userLimit ?? r.purchased,
+          issued:          r.issued,
+          remaining:       r.remaining,
+          concurrentLimit: r.concurrentLimit,
+          gracePeriod:     r.gracePeriod,
+          startDate:       r.startDate,
           endDate:         r.expiry,
-          features:        r.features
+          activatedOn:     r.activatedOn,
+          graceUntil:      r.graceUntil,
+          features:        r.features,
+          source:          r.source,
+          status:          this.computeStatus(r.expiry, r.graceUntil)
         }));
         this.productsLoaded = true;
         this.cdr.markForCheck();
       },
       error: () => { this.productsLoaded = true; this.cdr.markForCheck(); }
     });
+  }
+
+  /** Active while before expiry; Grace while past expiry but within graceUntil; else Expired. */
+  private computeStatus(expiry?: string, graceUntil?: string): 'Active' | 'Grace' | 'Expired' {
+    if (!expiry) return 'Active';
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const exp = new Date(expiry);
+    if (today <= exp) return 'Active';
+    if (graceUntil && today <= new Date(graceUntil)) return 'Grace';
+    return 'Expired';
+  }
+
+  statusColor(status?: string): string {
+    switch (status) {
+      case 'Grace':   return '#ff8200';
+      case 'Expired': return '#DC2626';
+      default:        return '#059669';
+    }
   }
 
   addLicense() {

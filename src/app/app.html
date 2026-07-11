@@ -1,3 +1,6 @@
+@if (isPasswordResetRoute) {
+<router-outlet></router-outlet>
+} @else {
 <!-- 1. LOGIN SCREEN -->
 @if (!isLoggedIn) {
 <div class="login-container">
@@ -70,7 +73,7 @@
         </div>
 
         <div class="login-extras">
-          <div class="login-forgot-password">Forgot password?</div>
+          <div class="login-forgot-password" (click)="goToForgotPassword()">Forgot password?</div>
         </div>
 
         <button
@@ -386,5 +389,6 @@
     </div>
   </dialog>
 </div>
+}
 }
 }
