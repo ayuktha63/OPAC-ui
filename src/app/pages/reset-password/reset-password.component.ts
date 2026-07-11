@@ -1,9 +1,13 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
+import { of } from 'rxjs';
+import { catchError, timeout } from 'rxjs/operators';
 import { AppConfigService } from '../../core/app-config.service';
+
+type ValidateResponse = { valid: boolean; reason?: string; username?: string; tenantName?: string; maskedEmail?: string };
 
 @Component({
   selector: 'app-reset-password',
@@ -17,6 +21,7 @@ export class ResetPasswordComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly cfg = inject(AppConfigService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   token = '';
   newPassword = '';
@@ -38,27 +43,34 @@ export class ResetPasswordComponent implements OnInit {
       this.checkingToken = false;
       return;
     }
+    this.checkToken();
+  }
 
-    this.http.get<{ valid: boolean; reason?: string; username?: string; tenantName?: string; maskedEmail?: string }>(
+  /** Public so the "Try again" action on a failed/timed-out check can re-run it. */
+  checkToken(): void {
+    this.checkingToken = true;
+    this.tokenInvalid = false;
+    this.tokenExpired = false;
+
+    this.http.get<ValidateResponse>(
       `${this.cfg.opacApiUrl}/api/auth/reset-password/validate`,
       { params: { token: this.token } }
-    ).subscribe({
-      next: (res) => {
-        this.checkingToken = false;
-        if (res.valid) {
-          this.username = res.username || '';
-          this.tenantName = res.tenantName || '';
-          this.maskedEmail = res.maskedEmail || '';
-        } else if (res.reason === 'expired') {
-          this.tokenExpired = true;
-        } else {
-          this.tokenInvalid = true;
-        }
-      },
-      error: () => {
-        this.checkingToken = false;
+    ).pipe(
+      // Never leave the user staring at "Checking…" forever, whatever the cause.
+      timeout(10000),
+      catchError(() => of({ valid: false, reason: 'invalid' } as ValidateResponse))
+    ).subscribe((res) => {
+      this.checkingToken = false;
+      if (res.valid) {
+        this.username = res.username || '';
+        this.tenantName = res.tenantName || '';
+        this.maskedEmail = res.maskedEmail || '';
+      } else if (res.reason === 'expired') {
+        this.tokenExpired = true;
+      } else {
         this.tokenInvalid = true;
       }
+      this.cdr.detectChanges();
     });
   }
 
@@ -92,10 +104,12 @@ export class ResetPasswordComponent implements OnInit {
         } else {
           this.errorMessage = res.message || 'This reset link is invalid or has expired. Please request a new one.';
         }
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.loading = false;
         this.errorMessage = err?.error?.message || 'This reset link is invalid or has expired. Please request a new one.';
+        this.cdr.detectChanges();
       }
     });
   }

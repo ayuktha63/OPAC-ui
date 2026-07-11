@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -16,6 +16,7 @@ export class ForgotPasswordComponent {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
   private readonly cfg = inject(AppConfigService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   usernameOrEmail = '';
   loading = false;
@@ -38,11 +39,13 @@ export class ForgotPasswordComponent {
       next: () => {
         this.loading = false;
         this.submitted = true;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.loading = false;
         // Same generic message on error as on success — don't reveal whether the account exists.
         this.submitted = true;
+        this.cdr.detectChanges();
       }
     });
   }
