@@ -53,10 +53,6 @@ export class ListPageComponent implements OnInit, OnChanges, OnDestroy {
   /** Products allowed by the tenant's master license — limits the license-form product picker. */
   allowedProducts: string[] = [];
 
-  // Legacy error toast (kept for backward compat)
-  toastError: string | null = null;
-  private _toastTimer: any = null;
-
   private _routeSub?: Subscription;
   /** Resource that has been loaded — used to reload when the @Input resource changes */
   private _loadedResource: string | null = null;
@@ -139,7 +135,6 @@ export class ListPageComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnDestroy() {
     this._routeSub?.unsubscribe();
-    if (this._toastTimer) clearTimeout(this._toastTimer);
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -384,13 +379,5 @@ export class ListPageComponent implements OnInit, OnChanges, OnDestroy {
 
   private showError(message: string) {
     this.toast.addError('Error', message);
-    // Keep legacy inline toast as backup
-    if (this._toastTimer) clearTimeout(this._toastTimer);
-    this.toastError = message;
-    this._toastTimer = setTimeout(() => {
-      this.toastError = null;
-      this.cdr.markForCheck();
-    }, 6000);
-    this.cdr.markForCheck();
   }
 }
