@@ -100,6 +100,16 @@
   width: 100%;
 }
 
+.login-error {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  color: #dc2626;
+  font-size: 13px;
+}
+
 .login-forgot-password {
   color: #2563eb;
   cursor: pointer;
@@ -144,6 +154,24 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.reset-checking {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0 4px;
+}
+
+.reset-spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid #e5e7eb;
+  border-top-color: #ff8200;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
 }
 
 /* Sub-role selector (radio pill group) */

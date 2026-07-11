@@ -66,13 +66,47 @@
               <div class="tc-product">
                 <div class="tc-product-head">
                   <span class="tc-product-name">{{ prod.productName }}</span>
+                  <span class="tc-status-pill" [style.color]="statusColor(prod.status)"
+                        [style.border-color]="statusColor(prod.status)">
+                    {{ prod.status }}
+                  </span>
+                </div>
+
+                <div class="tc-detail-grid">
                   @if (prod.userLimit != null) {
-                    <span class="tc-product-users">{{ prod.issued || 0 }}/{{ prod.userLimit }} used</span>
+                    <div class="tc-detail"><span class="tc-detail-label">Users</span>
+                      <span class="tc-detail-value">{{ prod.issued || 0 }} / {{ prod.userLimit }} used
+                        @if (prod.remaining != null) { <em>({{ prod.remaining }} left)</em> }
+                      </span>
+                    </div>
+                  }
+                  @if (prod.concurrentLimit != null) {
+                    <div class="tc-detail"><span class="tc-detail-label">Concurrent</span>
+                      <span class="tc-detail-value">{{ prod.concurrentLimit }}</span>
+                    </div>
+                  }
+                  @if (prod.startDate) {
+                    <div class="tc-detail"><span class="tc-detail-label">Start Date</span>
+                      <span class="tc-detail-value">{{ formatDate(prod.startDate) }}</span>
+                    </div>
+                  }
+                  @if (prod.endDate) {
+                    <div class="tc-detail"><span class="tc-detail-label">Expiry</span>
+                      <span class="tc-detail-value">{{ formatDate(prod.endDate) }}</span>
+                    </div>
+                  }
+                  @if (prod.gracePeriod != null) {
+                    <div class="tc-detail"><span class="tc-detail-label">Grace Period</span>
+                      <span class="tc-detail-value">{{ prod.gracePeriod }} day{{ prod.gracePeriod === 1 ? '' : 's' }}</span>
+                    </div>
+                  }
+                  @if (prod.graceUntil) {
+                    <div class="tc-detail"><span class="tc-detail-label">Grace Until</span>
+                      <span class="tc-detail-value">{{ formatDate(prod.graceUntil) }}</span>
+                    </div>
                   }
                 </div>
-                @if (prod.endDate) {
-                  <div class="tc-product-dates">Expires: {{ formatDate(prod.endDate) }}</div>
-                }
+
                 @if (prod.features?.length) {
                   <div class="tc-features">
                     @for (f of prod.features; track f) {
@@ -195,8 +229,8 @@
                 <div class="sub-card-logo" [style.background]="productColor(prod.productName)">
                   {{ productInitial(prod.productName) }}
                 </div>
-                <span class="sub-card-active-badge">
-                  <span class="sub-active-dot"></span> Active
+                <span class="sub-card-active-badge" [style.color]="statusColor(prod.status)">
+                  <span class="sub-active-dot" [style.background]="statusColor(prod.status)"></span> {{ prod.status || 'Active' }}
                 </span>
               </div>
 
@@ -217,6 +251,25 @@
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                     Expires {{ formatDate(prod.endDate) }}
                   </span>
+                }
+              </div>
+
+              <!-- License detail rows -->
+              <div class="sub-detail-list">
+                @if (prod.startDate) {
+                  <div class="sub-detail-row"><span>Start Date</span><span>{{ formatDate(prod.startDate) }}</span></div>
+                }
+                @if (prod.activatedOn) {
+                  <div class="sub-detail-row"><span>Activated On</span><span>{{ formatDate(prod.activatedOn) }}</span></div>
+                }
+                @if (prod.gracePeriod != null) {
+                  <div class="sub-detail-row"><span>Grace Period</span><span>{{ prod.gracePeriod }} day{{ prod.gracePeriod === 1 ? '' : 's' }}</span></div>
+                }
+                @if (prod.graceUntil) {
+                  <div class="sub-detail-row"><span>Grace Until</span><span>{{ formatDate(prod.graceUntil) }}</span></div>
+                }
+                @if (prod.concurrentLimit != null) {
+                  <div class="sub-detail-row"><span>Concurrent Users</span><span>{{ prod.concurrentLimit }}</span></div>
                 }
               </div>
 

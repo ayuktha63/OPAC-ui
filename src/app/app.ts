@@ -2,7 +2,7 @@ import { Component, ElementRef, HostListener, OnInit, ChangeDetectorRef } from '
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterOutlet } from '@angular/router';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { ContextSwitcherComponent, OToastComponent, OAppSwitcherComponent, AppItem } from 'orque-ui';
 import { SystemSettingsService } from './core/system-settings.service';
 import { TenantContextService } from './core/tenant-context.service';
@@ -38,6 +38,7 @@ export class App implements OnInit {
   // ── App Switcher ──────────────────────────────────────────
   crmLaunching = false;
   showNoLicensePopup = false;
+  showLicenseExpiredPopup = false;
 
   get hasCrmLicense(): boolean {
     return localStorage.getItem('opac_has_crm_license') === 'true';
@@ -91,6 +92,24 @@ export class App implements OnInit {
     this.showNoLicensePopup = false;
   }
 
+  /**
+   * Shows a dismissible "license expired" notice for tenants without an active
+   * license — but never on the /license page itself, since that's the reapply
+   * screen and would be pointless (and obstructive) to overlay with this.
+   */
+  private evaluateLicenseExpiredPopup(): void {
+    if (!this.isLoggedIn) { this.showLicenseExpiredPopup = false; return; }
+    const onLicensePage = this.router.url.startsWith('/license');
+    this.showLicenseExpiredPopup =
+      !this.tenantContextSvc.isPlatformOwner() &&
+      !this.tenantContextSvc.hasActiveLicense() &&
+      !onLicensePage;
+  }
+
+  closeLicenseExpiredPopup() {
+    this.showLicenseExpiredPopup = false;
+  }
+
   // ── Active Tenant Context ────────────────────────────────
   activeTenant: any = (() => {
     const uuid = localStorage.getItem('opac_tenant_uuid');
@@ -128,6 +147,21 @@ export class App implements OnInit {
   ngOnInit() {
     this.loadActiveTenants();
     this.restoreSession();
+    this.evaluateLicenseExpiredPopup();
+    this.syncRouteFlags(this.router.url);
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        this.evaluateLicenseExpiredPopup();
+        // Navigation resolves outside this component's own event handlers, so the
+        // template gate on isPasswordResetRoute won't repaint without an explicit tick.
+        this.syncRouteFlags(event.urlAfterRedirects);
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  private syncRouteFlags(url: string): void {
+    this.isPasswordResetRoute = url.startsWith('/forgot-password') || url.startsWith('/reset-password');
   }
 
   private restoreSession(): void {
@@ -163,6 +197,15 @@ export class App implements OnInit {
   get currentTenantName(): string {
     return localStorage.getItem('opac_tenant_name') || this.activeTenant?.tenant_name || '';
   }
+
+  goToForgotPassword(): void {
+    this.router.navigate(['/forgot-password']);
+  }
+
+  /** These two screens must render even when logged out, bypassing the login-form shell entirely.
+   *  Kept as a plain field (updated in syncRouteFlags on NavigationEnd) so the template
+   *  gate repaints deterministically with the explicit detectChanges() tick. */
+  isPasswordResetRoute = false;
 
   get isPlatformOwner(): boolean {
     return this.tenantContextSvc.isPlatformOwner();
@@ -239,6 +282,7 @@ export class App implements OnInit {
           );
 
           this.isLoggedIn = true;
+          this.evaluateLicenseExpiredPopup();
           this.cdr.detectChanges();
 
           // Route each user type to their appropriate home screen
