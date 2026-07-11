@@ -269,13 +269,6 @@
   font-size: 1.2rem; font-weight: 800; color: #0f172a; margin: 0 0 10px;
   letter-spacing: -0.3px;
 }
-.sub-card-source-note {
-  font-size: 0.75rem; color: #92400e; background: #fff7ed; border: 1px solid #fed7aa;
-  border-radius: 6px; padding: 6px 10px; margin: -4px 0 12px; line-height: 1.4;
-}
-.sub-card-source-note--personal {
-  color: #065f46; background: #ecfdf5; border-color: #a7f3d0;
-}
 .sub-card-divider {
   height: 2px; border-radius: 2px; opacity: 0.15; margin-bottom: 14px;
 }
