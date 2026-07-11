@@ -236,6 +236,11 @@
 
               <!-- Product name -->
               <h3 class="sub-card-name">{{ prod.productName }}</h3>
+              @if (prod.source === 'org-license') {
+                <p class="sub-card-source-note">Available through your organization's plan — you haven't personally activated a license key for this product.</p>
+              } @else if (prod.activatedOn) {
+                <p class="sub-card-source-note sub-card-source-note--personal">Personally activated by you.</p>
+              }
               <div class="sub-card-divider" [style.background]="productColor(prod.productName)"></div>
 
               <!-- Meta row: users · expiry -->
