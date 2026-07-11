@@ -4,6 +4,19 @@ import { adminOrOwnerGuard, licenseRequiredGuard, platformOwnerGuard } from './c
 export const routes: Routes = [
   { path: '', redirectTo: '/tenant', pathMatch: 'full' },
 
+  // Password reset — reachable while logged out; rendered directly by app.ts,
+  // bypassing the login-form shell (see isPasswordResetRoute in app.ts).
+  {
+    path: 'forgot-password',
+    loadComponent: () =>
+      import('./pages/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent)
+  },
+  {
+    path: 'reset-password',
+    loadComponent: () =>
+      import('./pages/reset-password/reset-password.component').then(m => m.ResetPasswordComponent)
+  },
+
   // Tenant – ORQUE platform-owner only
   {
     path: 'tenant',
